@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantConnect.ExanteBrokerag
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantConnect.ExanteBrokerage.Tests", "QuantConnect.ExanteBrokerage.Tests\QuantConnect.ExanteBrokerage.Tests.csproj", "{DBCC87C9-3806-418A-8BB9-47AC05E6EB1C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantConnect.ExanteBrokerage.ToolBox", "QuantConnect.ExanteBrokerage.ToolBox\QuantConnect.ExanteBrokerage.ToolBox.csproj", "{1AB073F2-6881-48C3-AC07-A042D0B51E6B}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantConnect.Api", "..\Lean\Api\QuantConnect.Api.csproj", "{B89FD499-79A7-49BC-B0D7-07A7ECDC953A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantConnect.Algorithm", "..\Lean\Algorithm\QuantConnect.Algorithm.csproj", "{8B017B3D-C950-4A52-B9C6-DE43515A7370}"
