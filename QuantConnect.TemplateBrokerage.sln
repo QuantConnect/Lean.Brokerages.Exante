@@ -19,6 +19,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantConnect.TemplateBroker
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantConnect.TemplateBrokerage.ToolBox", "QuantConnect.TemplateBrokerage.ToolBox\QuantConnect.TemplateBrokerage.ToolBox.csproj", "{1AB073F2-6881-48C3-AC07-A042D0B51E6B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantConnect.ExanteBrokerage", "QuantConnect.ExanteBrokerage\QuantConnect.ExanteBrokerage.csproj", "{029868E8-4877-40D8-A743-1B104566BE4D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantConnect.ExanteBrokerage.Tests", "QuantConnect.ExanteBrokerage.Tests\QuantConnect.ExanteBrokerage.Tests.csproj", "{DBCC87C9-3806-418A-8BB9-47AC05E6EB1C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +61,14 @@ Global
 		{1AB073F2-6881-48C3-AC07-A042D0B51E6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1AB073F2-6881-48C3-AC07-A042D0B51E6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1AB073F2-6881-48C3-AC07-A042D0B51E6B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{029868E8-4877-40D8-A743-1B104566BE4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{029868E8-4877-40D8-A743-1B104566BE4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{029868E8-4877-40D8-A743-1B104566BE4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{029868E8-4877-40D8-A743-1B104566BE4D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBCC87C9-3806-418A-8BB9-47AC05E6EB1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBCC87C9-3806-418A-8BB9-47AC05E6EB1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBCC87C9-3806-418A-8BB9-47AC05E6EB1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBCC87C9-3806-418A-8BB9-47AC05E6EB1C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
