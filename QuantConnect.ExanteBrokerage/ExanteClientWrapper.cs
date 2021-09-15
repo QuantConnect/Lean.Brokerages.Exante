@@ -225,7 +225,7 @@ namespace QuantConnect.ExanteBrokerage
                 priceDistance,
                 limitPrice,
                 ct).SynchronouslyAwaitTaskResult();
-            CheckIfResponseOk(response);
+            CheckIfResponseOk(response, HttpStatusCode.Accepted);
             return response;
         }
 
