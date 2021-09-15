@@ -66,6 +66,7 @@ namespace QuantConnect.ExanteBrokerage
                 SecurityType.Equity => symbol.ID.Symbol,
                 SecurityType.Index => ticker,
                 SecurityType.Forex => ticker[..3] + "/" + ticker[3..],
+                SecurityType.Crypto => ticker[..3],
                 _ => ticker
             };
 
