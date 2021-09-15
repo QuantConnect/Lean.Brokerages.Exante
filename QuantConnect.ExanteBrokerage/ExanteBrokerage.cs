@@ -377,6 +377,7 @@ namespace QuantConnect.ExanteBrokerage
                 foreach (var o in orderPlacement.Data)
                 {
                     _orderMap[o.OrderId] = order;
+                    order.BrokerId.Add(o.OrderId.ToString());
                 }
 
                 if (!orderPlacement.Success)
