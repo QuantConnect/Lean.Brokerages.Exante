@@ -16,19 +16,98 @@
 using System;
 using System.Collections.Generic;
 using QuantConnect.Brokerages;
+using Log = QuantConnect.Logging.Log;
+using System.Linq;
 
 namespace QuantConnect.ExanteBrokerage
 {
+    public static class ExanteMarket
+    {
+        public const string NASDAQ = "NASDAQ";
+        public const string ARCA = "ARCA";
+        public const string AMEX = "AMEX";
+        public const string EXANTE = "EXANTE";
+        public const string USD = "USD";
+        public const string USCORP = "USCORP";
+        public const string EUR = "EUR";
+        public const string GBP = "GBP";
+        public const string ASN = "ASN";
+        public const string CAD = "CAD";
+        public const string AUD = "AUD";
+        public const string ARG = "ARG";
+    }
+
+    public class ExanteSymbolLocal
+    {
+        public string Exchange { get; }
+        public string SymbolId { get; }
+
+        public ExanteSymbolLocal(string exchange, string symbolId)
+        {
+            Exchange = exchange;
+            SymbolId = symbolId;
+        }
+
+        public string Id => $"{SymbolId}.{Exchange}";
+    }
+
     /// <summary>
     /// Provides the mapping between Lean symbols and Exante symbols.
     /// </summary>
     public class ExanteSymbolMapper : ISymbolMapper
     {
         private readonly Dictionary<string, string> _tickerToExchange;
+        private readonly ExanteClientWrapper _client;
+        private readonly HashSet<string> _supportedCryptoCurrencies;
 
-        public ExanteSymbolMapper(Dictionary<string, string> tickerToExchange)
+        public ExanteSymbolMapper(
+            ExanteClientWrapper client,
+            HashSet<string> supportedCryptoCurrencies)
         {
-            _tickerToExchange = tickerToExchange;
+            _client = client;
+            _supportedCryptoCurrencies = supportedCryptoCurrencies;
+            _tickerToExchange = ComposeTickerToExchangeDictionary();
+        }
+
+        private Dictionary<string, string> ComposeTickerToExchangeDictionary()
+        {
+            var tickerToExchange = new Dictionary<string, string>();
+
+            void AddMarketSymbols(string market, Func<string, List<string>> tickersByMarket)
+            {
+                market = market.LazyToUpper();
+                var symbols = tickersByMarket(market);
+                foreach (var sym in symbols)
+                {
+                    if (tickerToExchange.ContainsKey(sym))
+                    {
+                        if (market != tickerToExchange[sym])
+                        {
+                            Log.Error($"Symbol {sym} occurs on two exchanges: {tickerToExchange[sym]} {market}");
+                        }
+                    }
+                    else
+                    {
+                        tickerToExchange.Add(sym, market);
+                    }
+                }
+            }
+
+            foreach (var market in new[]
+            {
+                ExanteMarket.NASDAQ, ExanteMarket.ARCA, ExanteMarket.AMEX, ExanteMarket.EXANTE,
+                ExanteMarket.USD, ExanteMarket.USCORP, ExanteMarket.EUR, ExanteMarket.GBP,
+                ExanteMarket.ASN, ExanteMarket.CAD, ExanteMarket.AUD, ExanteMarket.ARG,
+                Market.CBOE, Market.CME, "OTCMKTS", Market.NYMEX, Market.CBOT, Market.COMEX, Market.ICE,
+            })
+            {
+                AddMarketSymbols(market,
+                    m => _client.GetSymbolsByExchange(m).Data.Select(x => x.Ticker).ToList());
+            }
+
+            AddMarketSymbols("USD", m => _supportedCryptoCurrencies.ToList());
+
+            return tickerToExchange;
         }
 
         /// <summary>
@@ -37,6 +116,11 @@ namespace QuantConnect.ExanteBrokerage
         /// <param name="symbol">A Lean symbol instance</param>
         /// <returns>The brokerage symbol</returns>
         public string GetBrokerageSymbol(Symbol symbol)
+        {
+            return GetExanteSymbol(symbol).Id;
+        }
+
+        public ExanteSymbolLocal GetExanteSymbol(Symbol symbol)
         {
             if (string.IsNullOrWhiteSpace(symbol?.Value))
                 throw new ArgumentException($"Invalid symbol: {(symbol == null ? "null" : symbol.ToString())}");
@@ -77,7 +161,7 @@ namespace QuantConnect.ExanteBrokerage
                 throw new ArgumentException($"Unknown exchange for symbol '{symbolId}'");
             }
 
-            return $"{symbolId}.{exchange}";
+            return new ExanteSymbolLocal(exchange, symbolId);
         }
 
         /// <summary>
@@ -135,6 +219,18 @@ namespace QuantConnect.ExanteBrokerage
             }
 
             return symbol;
+        }
+
+        public string GetExchange(string symbolId)
+        {
+            var brokerageSymbol = GetExanteSymbol(symbolId);
+
+            if (!_tickerToExchange.TryGetValue(brokerageSymbol.SymbolId, out var exchange))
+            {
+                throw new ArgumentException($"Unknown exchange for symbol '{symbolId}'");
+            }
+
+            return exchange;
         }
     }
 }
