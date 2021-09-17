@@ -749,46 +749,6 @@ namespace QuantConnect.ExanteBrokerage
 
         #endregion
 
-        private Dictionary<string, string> ComposeTickerToExchangeDictionary()
-        {
-            var tickerToExchange = new Dictionary<string, string>();
-
-            void AddMarketSymbols(string market, Func<string, List<string>> tickersByMarket)
-            {
-                market = market.LazyToUpper();
-                var symbols = tickersByMarket(market);
-                foreach (var sym in symbols)
-                {
-                    if (tickerToExchange.ContainsKey(sym))
-                    {
-                        if (market != tickerToExchange[sym])
-                        {
-                            Log.Error($"Symbol {sym} occurs on two exchanges: {tickerToExchange[sym]} {market}");
-                        }
-                    }
-                    else
-                    {
-                        tickerToExchange.Add(sym, market);
-                    }
-                }
-            }
-
-            foreach (var market in new[]
-            {
-                "NASDAQ", "ARCA", "AMEX", "EXANTE",
-                "USD", "USCORP", "EUR", "GBP", "ASN", "CAD", "AUD", "ARG", "CAD",
-                Market.CBOE, Market.CME, "OTCMKTS", Market.NYMEX, Market.CBOT, Market.COMEX, Market.ICE,
-            })
-            {
-                AddMarketSymbols(market,
-                    m => Client.GetSymbolsByExchange(m).Data.Select(x => x.Ticker).ToList());
-            }
-
-            AddMarketSymbols("USD", m => SupportedCryptoCurrencies.ToList());
-
-            return tickerToExchange;
-        }
-
         private void OnUserMessage(ExanteOrder exanteOrder)
         {
             Order order;
