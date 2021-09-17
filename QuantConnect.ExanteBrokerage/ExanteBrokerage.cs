@@ -291,7 +291,24 @@ namespace QuantConnect.ExanteBrokerage
             switch (order.TimeInForce)
             {
                 case GoodTilCanceledTimeInForce _:
-                    orderDuration = ExanteOrderDuration.GoodTillCancel;
+                    // NOTE:
+                    // GTC order duration is not available for market orders due to its specifics.
+                    //
+                    // GTC duration implies an order to stay active until the trade is executed or
+                    // canceled by investor. However, with market order type, the order gets executed
+                    // immediately at the best available current price. GTC duration can be used with
+                    // Limit or Stop (Stop-Limit) order types.
+                    //
+                    // orderDuration = ExanteOrderDuration.GoodTillCancel;
+                    orderDuration = SymbolMapper.GetExchange(order.Symbol) switch
+                    {
+                        ExanteMarket.USD => ExanteOrderDuration.GoodTillCancel,
+                        ExanteMarket.ARCA => ExanteOrderDuration.GoodTillCancel,
+                        ExanteMarket.NASDAQ => ExanteOrderDuration.GoodTillCancel,
+                        ExanteMarket.AMEX => ExanteOrderDuration.GoodTillCancel,
+                        _ => ExanteOrderDuration.Day
+                    };
+
                     break;
                 case DayTimeInForce _:
                     orderDuration = ExanteOrderDuration.Day;
