@@ -94,7 +94,6 @@ namespace QuantConnect.ExanteBrokerage
             IDataAggregator aggregator) : base("ExanteBrokerage")
         {
             Client = new ExanteClientWrapper(client);
-            SymbolMapper = new ExanteSymbolMapper(ComposeTickerToExchangeDictionary());
             _accountId = accountId;
 
             _aggregator = aggregator;
@@ -103,7 +102,7 @@ namespace QuantConnect.ExanteBrokerage
             _subscriptionManager.UnsubscribeImpl += (s, _) => Unsubscribe(s);
             Client = new ExanteClientWrapper(client);
 
-            SymbolMapper = new ExanteSymbolMapper(ComposeTickerToExchangeDictionary());
+            SymbolMapper = new ExanteSymbolMapper(Client, SupportedCryptoCurrencies);
             _messageHandler = new BrokerageConcurrentMessageHandler<ExanteOrder>(OnUserMessage);
 
             Client.StreamClient.GetOrdersStreamAsync(exanteOrder => { _messageHandler.HandleNewMessage(exanteOrder); });
