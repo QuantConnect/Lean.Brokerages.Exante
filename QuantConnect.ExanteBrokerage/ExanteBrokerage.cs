@@ -499,10 +499,19 @@ namespace QuantConnect.ExanteBrokerage
             {
                 foreach (var bi in order.BrokerId)
                 {
-                    var biGuid = Guid.Parse(bi);
-                    var exanteOrder = Client.ModifyOrder(biGuid, ExanteOrderAction.Cancel);
-                    _orderMap.TryRemove(biGuid, out _);
+                    var orderBrokerGuid = Guid.Parse(bi);
+                    var exanteOrder = Client.ModifyOrder(orderBrokerGuid, ExanteOrderAction.Cancel);
+                    _orderMap.TryRemove(orderBrokerGuid, out order);
                     cancelResult = cancelResult && exanteOrder.Success;
+
+                    if (exanteOrder.Success)
+                    {
+                        var orderEvent = new OrderEvent(order, DateTime.UtcNow, OrderFee.Zero)
+                        {
+                            Status = OrderStatus.Canceled,
+                        };
+                        OnOrderEvent(orderEvent);
+                    }
                 }
             });
 
