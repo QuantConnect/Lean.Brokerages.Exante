@@ -183,7 +183,6 @@ namespace QuantConnect.ExanteBrokerage
                             throw new ArgumentNullException(nameof(item.OrderParameters.LimitPrice));
                         }
 
-                        // order = new LimitOrder { LimitPrice = item.OrderParameters.LimitPrice.Value };
                         order = new LimitOrder(
                             symbol: ConvertSymbol(symbol),
                             quantity: orderQuantity,
@@ -197,7 +196,6 @@ namespace QuantConnect.ExanteBrokerage
                             throw new ArgumentNullException(nameof(item.OrderParameters.StopPrice));
                         }
 
-                        // order = new StopMarketOrder { StopPrice = item.OrderParameters.StopPrice.Value };
                         order = new StopMarketOrder(
                             symbol: ConvertSymbol(symbol),
                             quantity: orderQuantity,
@@ -216,11 +214,6 @@ namespace QuantConnect.ExanteBrokerage
                             throw new ArgumentNullException(nameof(item.OrderParameters.StopPrice));
                         }
 
-                        // order = new StopLimitOrder
-                        // {
-                        //     StopPrice = item.OrderParameters.StopPrice.Value,
-                        //     LimitPrice = item.OrderParameters.LimitPrice.Value
-                        // };
                         order = new StopLimitOrder(
                             symbol: ConvertSymbol(symbol),
                             quantity: orderQuantity,
@@ -297,8 +290,6 @@ namespace QuantConnect.ExanteBrokerage
                     // canceled by investor. However, with market order type, the order gets executed
                     // immediately at the best available current price. GTC duration can be used with
                     // Limit or Stop (Stop-Limit) order types.
-                    //
-                    // orderDuration = ExanteOrderDuration.GoodTillCancel;
                     orderDuration = SymbolMapper.GetExchange(order.Symbol) switch
                     {
                         ExanteMarket.USD => ExanteOrderDuration.GoodTillCancel,
