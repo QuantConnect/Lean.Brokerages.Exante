@@ -158,8 +158,9 @@ namespace QuantConnect.ExanteBrokerage
         /// <returns>The open orders returned from IB</returns>
         public override List<Order> GetOpenOrders()
         {
+            var openedOrdersList = new List<Order>();
             var orders = Client.GetActiveOrders().Data;
-            var list = new List<Order>();
+
             foreach (var item in orders)
             {
                 Order order;
@@ -231,10 +232,11 @@ namespace QuantConnect.ExanteBrokerage
 
                 order.BrokerId.Add(item.OrderId.ToString());
                 order.Status = ConvertOrderStatus(item.OrderState.Status);
-                list.Add(order);
+                _orderMap[item.OrderId] = order;
+                openedOrdersList.Add(order);
             }
 
-            return list;
+            return openedOrdersList;
         }
 
         /// <summary>
