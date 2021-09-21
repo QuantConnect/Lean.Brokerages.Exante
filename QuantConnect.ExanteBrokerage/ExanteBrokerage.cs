@@ -159,82 +159,85 @@ namespace QuantConnect.ExanteBrokerage
         public override List<Order> GetOpenOrders()
         {
             var openedOrdersList = new List<Order>();
-            var orders = Client.GetActiveOrders().Data;
 
-            foreach (var item in orders)
+            _messageHandler.WithLockedStream(() =>
             {
-                Order order;
-                var symbol = Client.GetSymbol(item.OrderParameters.SymbolId);
-
-                var orderQuantity = item.OrderParameters.Side switch
+                var orders = Client.GetActiveOrders().Data;
+                foreach (var item in orders)
                 {
-                    ExanteOrderSide.Buy => Math.Abs(item.OrderParameters.Quantity),
-                    ExanteOrderSide.Sell => -Math.Abs(item.OrderParameters.Quantity),
-                    _ => throw new ArgumentOutOfRangeException()
-                };
+                    Order order;
+                    var symbol = Client.GetSymbol(item.OrderParameters.SymbolId);
 
-                switch (item.OrderParameters.Type)
-                {
-                    case ExanteOrderType.Market:
-                        order = new MarketOrder();
-                        break;
-                    case ExanteOrderType.Limit:
-                        if (item.OrderParameters.LimitPrice == null)
-                        {
-                            throw new ArgumentNullException(nameof(item.OrderParameters.LimitPrice));
-                        }
+                    var orderQuantity = item.OrderParameters.Side switch
+                    {
+                        ExanteOrderSide.Buy => Math.Abs(item.OrderParameters.Quantity),
+                        ExanteOrderSide.Sell => -Math.Abs(item.OrderParameters.Quantity),
+                        _ => throw new ArgumentOutOfRangeException()
+                    };
 
-                        order = new LimitOrder(
-                            symbol: ConvertSymbol(symbol),
-                            quantity: orderQuantity,
-                            limitPrice: item.OrderParameters.LimitPrice.Value,
-                            time: item.Date
-                        );
-                        break;
-                    case ExanteOrderType.Stop:
-                        if (item.OrderParameters.StopPrice == null)
-                        {
-                            throw new ArgumentNullException(nameof(item.OrderParameters.StopPrice));
-                        }
+                    switch (item.OrderParameters.Type)
+                    {
+                        case ExanteOrderType.Market:
+                            order = new MarketOrder();
+                            break;
+                        case ExanteOrderType.Limit:
+                            if (item.OrderParameters.LimitPrice == null)
+                            {
+                                throw new ArgumentNullException(nameof(item.OrderParameters.LimitPrice));
+                            }
 
-                        order = new StopMarketOrder(
-                            symbol: ConvertSymbol(symbol),
-                            quantity: orderQuantity,
-                            stopPrice: item.OrderParameters.StopPrice.Value,
-                            time: item.Date
-                        );
-                        break;
-                    case ExanteOrderType.StopLimit:
-                        if (item.OrderParameters.LimitPrice == null)
-                        {
-                            throw new ArgumentNullException(nameof(item.OrderParameters.LimitPrice));
-                        }
+                            order = new LimitOrder(
+                                symbol: ConvertSymbol(symbol),
+                                quantity: orderQuantity,
+                                limitPrice: item.OrderParameters.LimitPrice.Value,
+                                time: item.Date
+                            );
+                            break;
+                        case ExanteOrderType.Stop:
+                            if (item.OrderParameters.StopPrice == null)
+                            {
+                                throw new ArgumentNullException(nameof(item.OrderParameters.StopPrice));
+                            }
 
-                        if (item.OrderParameters.StopPrice == null)
-                        {
-                            throw new ArgumentNullException(nameof(item.OrderParameters.StopPrice));
-                        }
+                            order = new StopMarketOrder(
+                                symbol: ConvertSymbol(symbol),
+                                quantity: orderQuantity,
+                                stopPrice: item.OrderParameters.StopPrice.Value,
+                                time: item.Date
+                            );
+                            break;
+                        case ExanteOrderType.StopLimit:
+                            if (item.OrderParameters.LimitPrice == null)
+                            {
+                                throw new ArgumentNullException(nameof(item.OrderParameters.LimitPrice));
+                            }
 
-                        order = new StopLimitOrder(
-                            symbol: ConvertSymbol(symbol),
-                            quantity: orderQuantity,
-                            stopPrice: item.OrderParameters.StopPrice.Value,
-                            limitPrice: item.OrderParameters.LimitPrice.Value,
-                            time: item.Date
-                        );
-                        break;
+                            if (item.OrderParameters.StopPrice == null)
+                            {
+                                throw new ArgumentNullException(nameof(item.OrderParameters.StopPrice));
+                            }
 
-                    default:
-                        OnMessage(new BrokerageMessageEvent(BrokerageMessageType.Error, -1,
-                            $"ExanteBrokerage.GetOpenOrders: Unsupported order type returned from brokerage: {item.OrderParameters.Type}"));
-                        continue;
+                            order = new StopLimitOrder(
+                                symbol: ConvertSymbol(symbol),
+                                quantity: orderQuantity,
+                                stopPrice: item.OrderParameters.StopPrice.Value,
+                                limitPrice: item.OrderParameters.LimitPrice.Value,
+                                time: item.Date
+                            );
+                            break;
+
+                        default:
+                            OnMessage(new BrokerageMessageEvent(BrokerageMessageType.Error, -1,
+                                $"ExanteBrokerage.GetOpenOrders: Unsupported order type returned from brokerage: {item.OrderParameters.Type}"));
+                            continue;
+                    }
+
+                    order.BrokerId.Add(item.OrderId.ToString());
+                    order.Status = ConvertOrderStatus(item.OrderState.Status);
+                    _orderMap[item.OrderId] = order;
+                    openedOrdersList.Add(order);
                 }
-
-                order.BrokerId.Add(item.OrderId.ToString());
-                order.Status = ConvertOrderStatus(item.OrderState.Status);
-                _orderMap[item.OrderId] = order;
-                openedOrdersList.Add(order);
-            }
+            });
 
             return openedOrdersList;
         }
