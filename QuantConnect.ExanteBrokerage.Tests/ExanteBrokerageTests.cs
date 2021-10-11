@@ -13,6 +13,8 @@
  * limitations under the License.
 */
 
+using System;
+using System.Linq;
 using NUnit.Framework;
 using QuantConnect.Configuration;
 using QuantConnect.Tests;
@@ -29,6 +31,7 @@ namespace QuantConnect.ExanteBrokerage.Tests
         protected override Symbol Symbol { get; }
         protected override SecurityType SecurityType { get; }
         private readonly ExanteBrokerage _brokerage;
+        private decimal? _askPrice;
 
         public ExanteBrokerageTests()
         {
@@ -60,7 +63,21 @@ namespace QuantConnect.ExanteBrokerage.Tests
 
         protected override decimal GetAskPrice(Symbol symbol)
         {
-            throw new System.NotImplementedException();
+            if (_askPrice is null)
+            {
+                var brokerageSymbol = _brokerage.SymbolMapper.GetBrokerageSymbol(symbol);
+                const int ticksCount = 5;
+                var ticks = _brokerage.Client.GetTicks(brokerageSymbol, limit: ticksCount).Data.ToList();
+
+                var tick = ticks.Find(x => x.Ask?.ToList()[0].Price != null);
+                _askPrice = tick?.Ask?.ToList()[0].Price;
+                if (_askPrice is null)
+                {
+                    throw new Exception($"{ticksCount} ticks are without ask price. Try to increase `ticksCount`");
+                }
+            }
+
+            return _askPrice.Value;
         }
 
 
