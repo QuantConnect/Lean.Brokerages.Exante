@@ -133,12 +133,24 @@ namespace QuantConnect.ExanteBrokerage.Tests
         [Test, TestCaseSource(nameof(OrderParameters))]
         public override void ShortFromLong(OrderTestParameters parameters)
         {
+            if (parameters is LimitOrderTestParameters or StopLimitOrderTestParameters or StopMarketOrderTestParameters)
+            {
+                Assert.Ignore("Replacing is not supported for this type of instrument. " +
+                              "Only cancellation and placing new order");
+            }
+
             base.ShortFromLong(parameters);
         }
 
         [Test, TestCaseSource(nameof(OrderParameters))]
         public override void LongFromShort(OrderTestParameters parameters)
         {
+            if (parameters is LimitOrderTestParameters or StopLimitOrderTestParameters)
+            {
+                Assert.Ignore("Replacing is not supported for this type of instrument. " +
+                              "Only cancellation and placing new order");
+            }
+
             base.LongFromShort(parameters);
         }
     }
