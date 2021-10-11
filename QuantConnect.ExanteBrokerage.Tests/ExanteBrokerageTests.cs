@@ -35,7 +35,7 @@ namespace QuantConnect.ExanteBrokerage.Tests
 
         public ExanteBrokerageTests()
         {
-            Symbol = Symbol.Create("SPY", SecurityType.Equity, Market.USA);
+            Symbol = Symbol.Create("ETH", SecurityType.Crypto, Market.USA);
 
             var clientId = Config.Get("exante-client-id");
             var applicationId = Config.Get("exante-application-id");
@@ -88,11 +88,11 @@ namespace QuantConnect.ExanteBrokerage.Tests
         {
             return new[]
             {
-                new TestCaseData(new MarketOrderTestParameters(Symbols.BTCUSD)).SetName("MarketOrder"),
-                new TestCaseData(new LimitOrderTestParameters(Symbols.BTCUSD, 10000m, 0.01m)).SetName("LimitOrder"),
-                new TestCaseData(new StopMarketOrderTestParameters(Symbols.BTCUSD, 10000m, 0.01m)).SetName(
+                new TestCaseData(new MarketOrderTestParameters(Symbols.ETHUSD)).SetName("MarketOrder"),
+                new TestCaseData(new LimitOrderTestParameters(Symbols.ETHUSD, 10000m, 0.01m)).SetName("LimitOrder"),
+                new TestCaseData(new StopMarketOrderTestParameters(Symbols.ETHUSD, 10000m, 0.01m)).SetName(
                     "StopMarketOrder"),
-                new TestCaseData(new StopLimitOrderTestParameters(Symbols.BTCUSD, 10000m, 0.01m)).SetName(
+                new TestCaseData(new StopLimitOrderTestParameters(Symbols.ETHUSD, 10000m, 0.01m)).SetName(
                     "StopLimitOrder"),
                 // `LimitIfTouchedOrder` Is not supported by Exante
                 // new TestCaseData(new LimitIfTouchedOrderTestParameters(Symbols.BTCUSD, 10000m, 0.01m)).SetName(
