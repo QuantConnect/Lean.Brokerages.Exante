@@ -20,16 +20,33 @@ namespace QuantConnect.ExanteBrokerage.Tests
     [TestFixture]
     public class ExanteBrokerageSymbolMapperTests
     {
+        ExanteSymbolMapper SymbolMapper()
+        {
+            var supportedCryptoCurrencies = ExanteBrokerage.SupportedCryptoCurrencies;
+            var clientWrapper = new ExanteClientWrapper(ExanteBrokerageHelper.ClientOptions());
+            var symbolMapper = new ExanteSymbolMapper(clientWrapper, supportedCryptoCurrencies);
+            return symbolMapper;
+        }
+
         [Test]
         public void ReturnsCorrectLeanSymbol()
         {
+            var mapper = SymbolMapper();
 
+            var symbol = mapper.GetLeanSymbol("EUR/USD", SecurityType.Forex, Market.Oanda);
+            Assert.AreEqual("EURUSD", symbol.Value);
+            Assert.AreEqual(SecurityType.Forex, symbol.ID.SecurityType);
+            Assert.AreEqual(Market.Oanda, symbol.ID.Market);
         }
 
         [Test]
         public void ReturnsCorrectBrokerageSymbol()
         {
+            var mapper = SymbolMapper();
 
+            var symbol = Symbol.Create("EURUSD", SecurityType.Forex, Market.Oanda);
+            var brokerageSymbol = mapper.GetBrokerageSymbol(symbol);
+            Assert.AreEqual("EUR/USD.EXANTE", brokerageSymbol);
         }
     }
 }

@@ -214,7 +214,7 @@ namespace QuantConnect.ExanteBrokerage
                     break;
 
                 default:
-                    symbol = Symbol.Create(brokerageSymbol, securityType, market);
+                    symbol = Symbol.Create(ConvertExanteSymbolToLeanSymbol(brokerageSymbol), securityType, market);
                     break;
             }
 
@@ -231,6 +231,11 @@ namespace QuantConnect.ExanteBrokerage
             }
 
             return exchange;
+        }
+
+        private static string ConvertExanteSymbolToLeanSymbol(string exanteSymbol)
+        {
+            return exanteSymbol.Replace("/", "");
         }
     }
 }
