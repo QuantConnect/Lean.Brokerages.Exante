@@ -37,13 +37,8 @@ namespace QuantConnect.ExanteBrokerage.Tests
         {
             Symbol = Symbol.Create("ETH", SecurityType.Crypto, Market.USA);
 
-            var clientId = Config.Get("exante-client-id");
-            var applicationId = Config.Get("exante-application-id");
-            var sharedKey = Config.Get("exante-shared-key");
             var accountId = Config.Get("exante-account-id");
-            var platformTypeStr = Config.Get("exante-platform-type");
-            var exanteClientOptions =
-                ExanteBrokerageFactory.CreateExanteClientOptions(clientId, applicationId, sharedKey, platformTypeStr);
+            var exanteClientOptions = ExanteBrokerageHelper.ClientOptions();
 
             _brokerage = new ExanteBrokerage(
                 exanteClientOptions,

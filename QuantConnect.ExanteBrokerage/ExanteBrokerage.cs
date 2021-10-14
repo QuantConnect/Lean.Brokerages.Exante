@@ -76,7 +76,7 @@ namespace QuantConnect.ExanteBrokerage
         /// </summary>
         public ExanteClientWrapper Client { get; }
 
-        private static readonly HashSet<string> SupportedCryptoCurrencies = new()
+        public static readonly HashSet<string> SupportedCryptoCurrencies = new()
         {
             "ETC", "MKR", "BNB", "NEO", "IOTA", "QTUM", "XMR", "EOS", "ETH", "XRP", "DCR",
             "XLM", "ZRX", "BTC", "XAI", "ZEC", "BAT", "BCH", "VEO", "DEFIX", "OMG", "LTC", "DASH"
