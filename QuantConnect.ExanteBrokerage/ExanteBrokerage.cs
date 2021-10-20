@@ -553,7 +553,7 @@ namespace QuantConnect.ExanteBrokerage
         /// <returns>True if selection can take place</returns>
         public bool CanPerformSelection()
         {
-            throw new NotImplementedException();
+            return true;
         }
 
         /// <summary>
