@@ -775,9 +775,60 @@ namespace QuantConnect.ExanteBrokerage
             OnOrderEvent(orderEvent);
         }
 
+        /// <summary>
+        /// Gets the history for the requested security
+        /// </summary>
+        /// <param name="request">The historical data request</param>
+        /// <returns>An enumerable of bars covering the span specified in the request</returns>
         public override IEnumerable<BaseData> GetHistory(Data.HistoryRequest request)
         {
-            throw new NotImplementedException();
+            var symbol = SymbolMapper.GetBrokerageSymbol(request.Symbol);
+
+            var exanteTimeframe = request.Resolution switch
+            {
+                Resolution.Tick => throw new ArgumentException(),
+                Resolution.Second => throw new ArgumentException(),
+                Resolution.Minute => ExanteCandleTimeframe.Minute1,
+                Resolution.Hour => ExanteCandleTimeframe.Hour1,
+                Resolution.Daily => ExanteCandleTimeframe.Day1,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+
+            var exanteTickType = request.TickType switch
+            {
+                TickType.Quote => ExanteTickType.Quotes,
+                TickType.Trade => ExanteTickType.Trades,
+                TickType.OpenInterest => throw new ArgumentException(),
+                _ => throw new ArgumentOutOfRangeException()
+            };
+
+            var history = Client.GetCandles(
+                symbol,
+                exanteTimeframe,
+                from: request.StartTimeUtc,
+                to: request.EndTimeUtc,
+                tickType: exanteTickType
+            ).Data.ToList();
+
+            var period = request.Resolution.ToTimeSpan();
+
+            foreach (var kline in history)
+            {
+                yield return new TradeBar()
+                {
+                    Time = kline.Date,
+                    Symbol = request.Symbol,
+                    Low = kline.Low,
+                    High = kline.High,
+                    Open = kline.Open,
+                    Close = kline.Close,
+                    Volume = kline.Volume ?? 0m,
+                    Value = kline.Close,
+                    DataType = MarketDataType.TradeBar,
+                    Period = period,
+                    EndTime = kline.Date.Add(period),
+                };
+            }
         }
     }
 }

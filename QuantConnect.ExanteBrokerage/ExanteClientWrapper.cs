@@ -164,6 +164,31 @@ namespace QuantConnect.ExanteBrokerage
             return response;
         }
 
+        /// <summary>Get OHLC candles</summary>
+        /// <returns>List of OHLC candles for the specified financial instrument and duration</returns>
+        public WebCallResult<IEnumerable<ExanteCandle>> GetCandles(
+            string symbolId,
+            ExanteCandleTimeframe timeframe,
+            DateTime? from = null,
+            DateTime? to = null,
+            int limit = 60,
+            ExanteTickType tickType = ExanteTickType.Quotes,
+            CancellationToken ct = default(CancellationToken)
+        )
+        {
+            var response = _client.GetCandlesAsync(
+                symbolId,
+                timeframe,
+                from,
+                to,
+                limit,
+                tickType,
+                ct
+            ).SynchronouslyAwaitTaskResult();
+            CheckIfResponseOk(response);
+            return response;
+        }
+
         /// <summary>Get instrument</summary>
         /// <returns>Instrument available for authorized user</returns>
         public ExanteSymbol GetSymbol(
