@@ -775,14 +775,17 @@ namespace QuantConnect.ExanteBrokerage
             OnOrderEvent(orderEvent);
         }
 
-        /// <summary>
-        /// Gets the history for the requested security
-        /// </summary>
-        /// <param name="request">The historical data request</param>
-        /// <returns>An enumerable of bars covering the span specified in the request</returns>
-        public override IEnumerable<BaseData> GetHistory(Data.HistoryRequest request)
+        private IEnumerable<BaseData> GetCandlesHistory(Data.HistoryRequest request)
         {
             var symbol = SymbolMapper.GetBrokerageSymbol(request.Symbol);
+
+            var exanteTickType = request.TickType switch
+            {
+                TickType.Quote => ExanteTickType.Quotes,
+                TickType.Trade => ExanteTickType.Trades,
+                TickType.OpenInterest => throw new ArgumentException(),
+                _ => throw new ArgumentOutOfRangeException()
+            };
 
             var exanteTimeframe = request.Resolution switch
             {
@@ -791,14 +794,6 @@ namespace QuantConnect.ExanteBrokerage
                 Resolution.Minute => ExanteCandleTimeframe.Minute1,
                 Resolution.Hour => ExanteCandleTimeframe.Hour1,
                 Resolution.Daily => ExanteCandleTimeframe.Day1,
-                _ => throw new ArgumentOutOfRangeException()
-            };
-
-            var exanteTickType = request.TickType switch
-            {
-                TickType.Quote => ExanteTickType.Quotes,
-                TickType.Trade => ExanteTickType.Trades,
-                TickType.OpenInterest => throw new ArgumentException(),
                 _ => throw new ArgumentOutOfRangeException()
             };
 
@@ -829,6 +824,22 @@ namespace QuantConnect.ExanteBrokerage
                     EndTime = kline.Date.Add(period),
                 };
             }
+        }
+
+        /// <summary>
+        /// Gets the history for the requested security
+        /// </summary>
+        /// <param name="request">The historical data request</param>
+        /// <returns>An enumerable of bars covering the span specified in the request</returns>
+        public override IEnumerable<BaseData> GetHistory(Data.HistoryRequest request)
+        {
+            return request.Resolution switch
+            {
+                Resolution.Tick => throw new ArgumentException(),
+                Resolution.Second => throw new ArgumentException(),
+                Resolution.Minute or Resolution.Hour or Resolution.Daily => GetCandlesHistory(request),
+                _ => throw new ArgumentOutOfRangeException()
+            };
         }
     }
 }
