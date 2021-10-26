@@ -14,8 +14,8 @@
 */
 
 using System;
-using QuantConnect.Data;
 using System.Collections.Generic;
+using QuantConnect.Data;
 
 namespace QuantConnect.ExanteBrokerage.ToolBox
 {
@@ -34,7 +34,10 @@ namespace QuantConnect.ExanteBrokerage.ToolBox
         /// <returns>Enumerable of base data for this symbol</returns>
         public IEnumerable<BaseData> Get(Symbol symbol, Resolution resolution, DateTime startUtc, DateTime endUtc)
         {
-            throw new NotImplementedException();
+            if (resolution == Resolution.Tick || resolution == Resolution.Second)
+                throw new ArgumentException($"Resolution not available: {resolution}");
+
+            throw new ArgumentException($"Resolution not available: {resolution}");
         }
     }
 }

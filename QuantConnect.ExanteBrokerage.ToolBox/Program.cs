@@ -1,4 +1,4 @@
-﻿/*
+/*
  * QUANTCONNECT.COM - Democratizing Finance, Empowering Individuals.
  * Lean Algorithmic Trading Engine v2.0. Copyright 2014 QuantConnect Corporation.
  *
@@ -13,13 +13,59 @@
  * limitations under the License.
 */
 
+using System;
+using System.IO;
+using QuantConnect.Configuration;
+using QuantConnect.Logging;
+using QuantConnect.Util;
+using static QuantConnect.Configuration.ApplicationParser;
+
 namespace QuantConnect.ExanteBrokerage.ToolBox
 {
-    static class Program
+    public static class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            var downloader = new ExanteBrokerageDownloader();
+            Log.DebuggingEnabled = Config.GetBool("debug-mode");
+            var destinationDir = Config.Get("results-destination-folder");
+            if (!string.IsNullOrEmpty(destinationDir))
+            {
+                Directory.CreateDirectory(destinationDir);
+                Log.FilePath = Path.Combine(destinationDir, "log.txt");
+            }
+
+            Log.LogHandler =
+                Composer.Instance.GetExportedValueByTypeName<ILogHandler>(Config.Get("log-handler",
+                    "CompositeLogHandler"));
+
+            var optionsObject = ToolboxArgumentParser.ParseArguments(args);
+            if (optionsObject.Count == 0) PrintMessageAndExit();
+
+            var targetApp = GetParameterOrExit(optionsObject, "app").ToLowerInvariant();
+            if (targetApp.Contains("download") || targetApp.EndsWith("dl"))
+            {
+                var fromDate = Parse.DateTimeExact(GetParameterOrExit(optionsObject, "from-date"), "yyyyMMdd-HH:mm:ss");
+                var resolution = optionsObject.ContainsKey("resolution") ? optionsObject["resolution"].ToString() : "";
+                var market = optionsObject.ContainsKey("market") ? optionsObject["market"].ToString() : "";
+                var securityType = optionsObject.ContainsKey("security-type")
+                    ? optionsObject["security-type"].ToString()
+                    : "";
+                var tickers = ToolboxArgumentParser.GetTickers(optionsObject);
+                var toDate = optionsObject.ContainsKey("to-date")
+                    ? Parse.DateTimeExact(optionsObject["to-date"].ToString(), "yyyyMMdd-HH:mm:ss")
+                    : DateTime.UtcNow;
+                switch (targetApp)
+                {
+                    case "exntdl":
+                    case "exantedownloader":
+                        ExanteDownloaderProgram.DataDownloader(tickers, resolution, fromDate, toDate);
+                        break;
+
+                    default:
+                        PrintMessageAndExit(1, "ERROR: Unrecognized --app value");
+                        break;
+                }
+            }
         }
     }
 }
