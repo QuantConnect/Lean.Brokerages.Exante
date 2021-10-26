@@ -35,6 +35,7 @@ namespace QuantConnect.ExanteBrokerage
         public const string CAD = "CAD";
         public const string AUD = "AUD";
         public const string ARG = "ARG";
+        public const string OTCMKTS = "OTCMKTS";
     }
 
     public class ExanteSymbolLocal
@@ -56,7 +57,7 @@ namespace QuantConnect.ExanteBrokerage
     /// </summary>
     public class ExanteSymbolMapper : ISymbolMapper
     {
-        private readonly Dictionary<string, string> _tickerToExchange;
+        private readonly Dictionary<string, string> _leanSymbolIdToExanteExchange;
         private readonly ExanteClientWrapper _client;
         private readonly HashSet<string> _supportedCryptoCurrencies;
 
@@ -66,7 +67,7 @@ namespace QuantConnect.ExanteBrokerage
         {
             _client = client;
             _supportedCryptoCurrencies = supportedCryptoCurrencies;
-            _tickerToExchange = ComposeTickerToExchangeDictionary();
+            _leanSymbolIdToExanteExchange = ComposeTickerToExchangeDictionary();
         }
 
         private Dictionary<string, string> ComposeTickerToExchangeDictionary()
@@ -96,9 +97,11 @@ namespace QuantConnect.ExanteBrokerage
             foreach (var market in new[]
             {
                 ExanteMarket.NASDAQ, ExanteMarket.ARCA, ExanteMarket.AMEX, ExanteMarket.EXANTE,
+#if !DEBUG
                 ExanteMarket.USD, ExanteMarket.USCORP, ExanteMarket.EUR, ExanteMarket.GBP,
                 ExanteMarket.ASN, ExanteMarket.CAD, ExanteMarket.AUD, ExanteMarket.ARG,
-                Market.CBOE, Market.CME, "OTCMKTS", Market.NYMEX, Market.CBOT, Market.COMEX, Market.ICE,
+                Market.CBOE, Market.CME, ExanteMarket.OTCMKTS, Market.NYMEX, Market.CBOT, Market.COMEX, Market.ICE,
+#endif
             })
             {
                 AddMarketSymbols(market,
@@ -156,7 +159,7 @@ namespace QuantConnect.ExanteBrokerage
 
             symbolId = symbolId.LazyToUpper();
 
-            if (!_tickerToExchange.TryGetValue(symbolId, out var exchange))
+            if (!_leanSymbolIdToExanteExchange.TryGetValue(symbolId, out var exchange))
             {
                 throw new ArgumentException($"Unknown exchange for symbol '{symbolId}'");
             }
@@ -221,13 +224,13 @@ namespace QuantConnect.ExanteBrokerage
             return symbol;
         }
 
-        public string GetExchange(string symbolId)
+        public string GetExchange(Symbol symbol)
         {
-            var brokerageSymbol = GetExanteSymbol(symbolId);
+            var brokerageSymbol = GetExanteSymbol(symbol);
 
-            if (!_tickerToExchange.TryGetValue(brokerageSymbol.SymbolId, out var exchange))
+            if (!_leanSymbolIdToExanteExchange.TryGetValue(brokerageSymbol.SymbolId, out var exchange))
             {
-                throw new ArgumentException($"Unknown exchange for symbol '{symbolId}'");
+                throw new ArgumentException($"Unknown exchange for symbol '{symbol}'");
             }
 
             return exchange;
