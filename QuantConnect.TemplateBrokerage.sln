@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31205.134
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantConnect.TemplateBrokerage", "QuantConnect.TemplateBrokerage\QuantConnect.TemplateBrokerage.csproj", "{7C447DDD-D30D-46C3-A341-2D768CCEEC10}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantConnect", "..\Lean\Common\QuantConnect.csproj", "{477827EE-5908-48AB-B6A4-DAB6E85D96DF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantConnect.Logging", "..\Lean\Logging\QuantConnect.Logging.csproj", "{86BE4507-719A-466A-B3E7-4840BBD1AAA8}"
@@ -15,15 +13,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantConnect.Brokerages", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantConnect.Tests", "..\Lean\Tests\QuantConnect.Tests.csproj", "{40B784EE-9297-4715-8C8F-829DFE858BEF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantConnect.TemplateBrokerage.Tests", "QuantConnect.TemplateBrokerage.Tests\QuantConnect.TemplateBrokerage.Tests.csproj", "{8793CDDF-3348-473F-98AF-68C6EBFA5014}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantConnect.TemplateBrokerage.ToolBox", "QuantConnect.TemplateBrokerage.ToolBox\QuantConnect.TemplateBrokerage.ToolBox.csproj", "{1AB073F2-6881-48C3-AC07-A042D0B51E6B}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantConnect.ExanteBrokerage", "QuantConnect.ExanteBrokerage\QuantConnect.ExanteBrokerage.csproj", "{029868E8-4877-40D8-A743-1B104566BE4D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantConnect.ExanteBrokerage.Tests", "QuantConnect.ExanteBrokerage.Tests\QuantConnect.ExanteBrokerage.Tests.csproj", "{DBCC87C9-3806-418A-8BB9-47AC05E6EB1C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantConnect.ExanteBrokerage.ToolBox", "QuantConnect.ExanteBrokerage.ToolBox\QuantConnect.ExanteBrokerage.ToolBox.csproj", "{1AB073F2-6881-48C3-AC07-A042D0B51E6B}"
+Project("{382B2EA0-92A2-4271-8CFE-6952D152A489}") = "QuantConnect.ExanteBrokerage.ToolBox", "QuantConnect.ExanteBrokerage.ToolBox\QuantConnect.ExanteBrokerage.ToolBox.csproj", "{1AB073F2-6881-48C3-AC07-A042D0B51E6B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantConnect.Api", "..\Lean\Api\QuantConnect.Api.csproj", "{B89FD499-79A7-49BC-B0D7-07A7ECDC953A}"
 EndProject
@@ -35,9 +29,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantConnect.Lean.Engine", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuantConnect.Algorithm.Framework", "..\Lean\Algorithm.Framework\QuantConnect.Algorithm.Framework.csproj", "{CF009569-FE44-473B-B60A-CC3B54DA71D5}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Lean", "Lean", "{25A5C60D-715C-4414-A262-05A031153612}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TemplateBrokerage", "TemplateBrokerage", "{20F16EEE-0326-4249-971C-D3056829E58E}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LeanFolder", "LeanFolder", "{25A5C60D-715C-4414-A262-05A031153612}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,10 +37,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{7C447DDD-D30D-46C3-A341-2D768CCEEC10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7C447DDD-D30D-46C3-A341-2D768CCEEC10}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7C447DDD-D30D-46C3-A341-2D768CCEEC10}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7C447DDD-D30D-46C3-A341-2D768CCEEC10}.Release|Any CPU.Build.0 = Release|Any CPU
 		{477827EE-5908-48AB-B6A4-DAB6E85D96DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{477827EE-5908-48AB-B6A4-DAB6E85D96DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{477827EE-5908-48AB-B6A4-DAB6E85D96DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -69,14 +57,6 @@ Global
 		{40B784EE-9297-4715-8C8F-829DFE858BEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{40B784EE-9297-4715-8C8F-829DFE858BEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{40B784EE-9297-4715-8C8F-829DFE858BEF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8793CDDF-3348-473F-98AF-68C6EBFA5014}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8793CDDF-3348-473F-98AF-68C6EBFA5014}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8793CDDF-3348-473F-98AF-68C6EBFA5014}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8793CDDF-3348-473F-98AF-68C6EBFA5014}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1AB073F2-6881-48C3-AC07-A042D0B51E6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1AB073F2-6881-48C3-AC07-A042D0B51E6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1AB073F2-6881-48C3-AC07-A042D0B51E6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1AB073F2-6881-48C3-AC07-A042D0B51E6B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{029868E8-4877-40D8-A743-1B104566BE4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{029868E8-4877-40D8-A743-1B104566BE4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{029868E8-4877-40D8-A743-1B104566BE4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -105,6 +85,8 @@ Global
 		{CF009569-FE44-473B-B60A-CC3B54DA71D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CF009569-FE44-473B-B60A-CC3B54DA71D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CF009569-FE44-473B-B60A-CC3B54DA71D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1AB073F2-6881-48C3-AC07-A042D0B51E6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1AB073F2-6881-48C3-AC07-A042D0B51E6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -123,7 +105,5 @@ Global
 		{67E87784-AF44-4703-8182-12F11D5D2090} = {25A5C60D-715C-4414-A262-05A031153612}
 		{86BE4507-719A-466A-B3E7-4840BBD1AAA8} = {25A5C60D-715C-4414-A262-05A031153612}
 		{40B784EE-9297-4715-8C8F-829DFE858BEF} = {25A5C60D-715C-4414-A262-05A031153612}
-		{7C447DDD-D30D-46C3-A341-2D768CCEEC10} = {20F16EEE-0326-4249-971C-D3056829E58E}
-		{8793CDDF-3348-473F-98AF-68C6EBFA5014} = {20F16EEE-0326-4249-971C-D3056829E58E}
 	EndGlobalSection
 EndGlobal
