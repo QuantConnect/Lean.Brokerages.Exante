@@ -47,9 +47,6 @@ namespace QuantConnect.ExanteBrokerage.ToolBox
                     ? new[] { Resolution.Minute, Resolution.Hour, Resolution.Daily }
                     : new[] { (Resolution)Enum.Parse(typeof(Resolution), resolution) };
 
-                // Load settings from config.json
-                var dataDirectory = Config.Get("data-folder", "../../../Data");
-
                 using var downloader = new ExanteDataDownloader();
                 foreach (var ticker in tickers)
                 {
@@ -60,7 +57,7 @@ namespace QuantConnect.ExanteBrokerage.ToolBox
                         var data = downloader.Get(symbol, castResolution, fromDate, toDate);
 
                         // Save the data (single resolution)
-                        var writer = new LeanDataWriter(castResolution, symbol, dataDirectory);
+                        var writer = new LeanDataWriter(castResolution, symbol, Globals.DataFolder);
                         writer.Write(data);
                     }
                 }

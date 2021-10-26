@@ -61,6 +61,14 @@ namespace QuantConnect.ExanteBrokerage
             return new ExanteBrokerageModel();
         }
 
+        public static ExanteClientOptions CreateExanteClientOptions()
+        {
+            return CreateExanteClientOptions(Config.Get("exante-client-id"),
+                Config.Get("exante-application-id"),
+                Config.Get("exante-shared-key"),
+                Config.Get("exante-platform-type"));
+        }
+
         public static ExanteClientOptions CreateExanteClientOptions(
             string clientId,
             string applicationId,
@@ -106,7 +114,7 @@ namespace QuantConnect.ExanteBrokerage
             if (!errors.empty())
             {
                 // if we had errors then we can't create the instance
-                throw new Exception(string.Join(System.Environment.NewLine, errors));
+                throw new ArgumentException(string.Join(Environment.NewLine, errors));
             }
 
             var clientOptions = CreateExanteClientOptions(clientId, applicationId, sharedKey, platformTypeStr);

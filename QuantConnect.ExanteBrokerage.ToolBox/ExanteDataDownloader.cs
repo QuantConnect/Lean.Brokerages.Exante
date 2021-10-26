@@ -16,9 +16,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Exante.Net;
 using Exante.Net.Enums;
-using QuantConnect.Configuration;
 using QuantConnect.Data;
 using QuantConnect.Data.Market;
 
@@ -35,10 +33,18 @@ namespace QuantConnect.ExanteBrokerage.ToolBox
         public ExanteDataDownloader()
         {
             var supportedCryptoCurrencies = ExanteBrokerage.SupportedCryptoCurrencies;
-            _clientWrapper = new ExanteClientWrapper(ClientOptions());
+            _clientWrapper = new ExanteClientWrapper(ExanteBrokerageFactory.CreateExanteClientOptions());
             _symbolMapper = new ExanteSymbolMapper(_clientWrapper, supportedCryptoCurrencies);
         }
 
+        /// <summary>
+        /// Get historical data enumerable for a single symbol, type and resolution given this start and end time (in UTC).
+        /// </summary>
+        /// <param name="symbol">Symbol for the data we're looking for.</param>
+        /// <param name="resolution">Resolution of the data request</param>
+        /// <param name="startUtc">Start time of the data in UTC</param>
+        /// <param name="endUtc">End time of the data in UTC</param>
+        /// <returns>Enumerable of base data for this symbol</returns>
         public IEnumerable<BaseData> Get(Symbol symbol, Resolution resolution, DateTime startUtc, DateTime endUtc)
         {
             var exanteSymbol = _symbolMapper.GetBrokerageSymbol(symbol);
@@ -55,28 +61,18 @@ namespace QuantConnect.ExanteBrokerage.ToolBox
             var candles =
                 _clientWrapper.GetCandles(exanteSymbol, timeframe, startUtc, endUtc).Data.ToList();
             foreach (var candle in candles)
+            {
                 yield return new TradeBar(
                     candle.Date, symbol,
                     candle.Open, candle.High, candle.Low, candle.Close,
                     candle.Volume ?? 0m, period
                 );
+            }
         }
 
         public void Dispose()
         {
             _clientWrapper.Dispose();
-        }
-
-        private static ExanteClientOptions ClientOptions()
-        {
-            var clientId = Config.Get("exante-client-id");
-            var applicationId = Config.Get("exante-application-id");
-            var sharedKey = Config.Get("exante-shared-key");
-            var platformTypeStr = Config.Get("exante-platform-type");
-            var exanteClientOptions =
-                ExanteBrokerageFactory.CreateExanteClientOptions(clientId, applicationId, sharedKey, platformTypeStr);
-
-            return exanteClientOptions;
         }
 
         public Symbol GetSymbol(string ticker)

@@ -35,6 +35,7 @@ using Log = QuantConnect.Logging.Log;
 using QuantConnect.Data.Market;
 using CryptoExchange.Net.Objects;
 using Newtonsoft.Json.Linq;
+using QuantConnect.Configuration;
 
 namespace QuantConnect.ExanteBrokerage
 {
@@ -83,6 +84,15 @@ namespace QuantConnect.ExanteBrokerage
         };
 
         /// <summary>
+        /// Parameterless constructor for brokerage
+        /// </summary>
+        /// <remarks>This parameterless constructor is required for brokerages implementing <see cref="IDataQueueHandler"/></remarks>
+        public ExanteBrokerage()
+            : this(ExanteBrokerageFactory.CreateExanteClientOptions(), Config.Get("exante-account-id"), Composer.Instance.GetPart<IDataAggregator>())
+        {
+        }
+
+        /// <summary>
         /// Creates a new ExanteBrokerage
         /// </summary>
         /// <param name="client">Exante client options to create REST API client instance</param>
@@ -100,7 +110,6 @@ namespace QuantConnect.ExanteBrokerage
             _subscriptionManager = new EventBasedDataQueueHandlerSubscriptionManager();
             _subscriptionManager.SubscribeImpl += Subscribe;
             _subscriptionManager.UnsubscribeImpl += (s, _) => Unsubscribe(s);
-            Client = new ExanteClientWrapper(client);
 
             SymbolMapper = new ExanteSymbolMapper(Client, SupportedCryptoCurrencies);
             _messageHandler = new BrokerageConcurrentMessageHandler<ExanteOrder>(OnUserMessage);
@@ -158,8 +167,6 @@ namespace QuantConnect.ExanteBrokerage
         /// <returns>The open orders returned from IB</returns>
         public override List<Order> GetOpenOrders()
         {
-            var openedOrdersList = new List<Order>();
-
             _messageHandler.WithLockedStream(() =>
             {
                 var orders = Client.GetActiveOrders().Data;
@@ -235,11 +242,10 @@ namespace QuantConnect.ExanteBrokerage
                     order.BrokerId.Add(item.OrderId.ToString());
                     order.Status = ConvertOrderStatus(item.OrderState.Status);
                     _orderMap[item.OrderId] = order;
-                    openedOrdersList.Add(order);
                 }
             });
 
-            return openedOrdersList;
+            return _orderMap.Values.ToList();
         }
 
         /// <summary>
@@ -821,7 +827,6 @@ namespace QuantConnect.ExanteBrokerage
                     Value = kline.Close,
                     DataType = MarketDataType.TradeBar,
                     Period = period,
-                    EndTime = kline.Date.Add(period),
                 };
             }
         }
