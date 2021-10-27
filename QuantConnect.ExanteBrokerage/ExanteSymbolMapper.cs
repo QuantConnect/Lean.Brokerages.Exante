@@ -125,9 +125,6 @@ namespace QuantConnect.ExanteBrokerage
 
         public ExanteSymbolLocal GetExanteSymbol(Symbol symbol)
         {
-            if (string.IsNullOrWhiteSpace(symbol?.Value))
-                throw new ArgumentException($"Invalid symbol: {(symbol == null ? "null" : symbol.ToString())}");
-
             var ticker = symbol.ID.Symbol;
 
             if (string.IsNullOrWhiteSpace(ticker))
