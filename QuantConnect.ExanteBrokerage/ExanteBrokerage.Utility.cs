@@ -278,7 +278,7 @@ namespace QuantConnect.ExanteBrokerage
 
                 case ExanteSymbolType.CFD:
                 {
-                    const string unknownCfdMarket = "USA";
+                    const string unknownCfdMarket = Market.USA;
                     return unknownCfdMarket;
                 }
 
