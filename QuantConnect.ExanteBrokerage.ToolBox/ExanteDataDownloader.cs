@@ -75,11 +75,9 @@ namespace QuantConnect.ExanteBrokerage.ToolBox
             _clientWrapper.Dispose();
         }
 
-        public Symbol GetSymbol(string ticker)
+        public Symbol GetSymbol(string ticker, string market, SecurityType securityType)
         {
-            var isCryptoCurrency = ExanteBrokerage.SupportedCryptoCurrencies.Any(ticker.Contains);
-            var securityType = isCryptoCurrency ? SecurityType.Crypto : SecurityType.Equity;
-            return _symbolMapper.GetLeanSymbol(ticker, securityType, Market.USA);
+            return _symbolMapper.GetLeanSymbol(ticker, securityType, market);
         }
     }
 }

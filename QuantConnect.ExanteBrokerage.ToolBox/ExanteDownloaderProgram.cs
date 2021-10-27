@@ -15,7 +15,6 @@
 
 using System;
 using System.Collections.Generic;
-using QuantConnect.Configuration;
 using QuantConnect.Data;
 using QuantConnect.Logging;
 using QuantConnect.Util;
@@ -27,10 +26,9 @@ namespace QuantConnect.ExanteBrokerage.ToolBox
         /// <summary>
         /// Primary entry point to the program.
         /// </summary>
-        public static void DataDownloader(
-            IList<string> tickers, string resolution,
-            DateTime fromDate, DateTime toDate
-        )
+        public static void DataDownloader(IList<string> tickers,
+            string market, SecurityType securityType, string resolution,
+            DateTime fromDate, DateTime toDate)
         {
             if (resolution.IsNullOrEmpty() || tickers.IsNullOrEmpty())
             {
@@ -51,7 +49,7 @@ namespace QuantConnect.ExanteBrokerage.ToolBox
                 foreach (var ticker in tickers)
                 {
                     // Download the data
-                    var symbol = downloader.GetSymbol(ticker);
+                    var symbol = downloader.GetSymbol(ticker, market, securityType);
                     foreach (var castResolution in resolutions)
                     {
                         var data = downloader.Get(symbol, castResolution, fromDate, toDate);

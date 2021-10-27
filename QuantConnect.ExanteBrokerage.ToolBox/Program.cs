@@ -46,10 +46,13 @@ namespace QuantConnect.ExanteBrokerage.ToolBox
             {
                 var fromDate = Parse.DateTimeExact(GetParameterOrExit(optionsObject, "from-date"), "yyyyMMdd-HH:mm:ss");
                 var resolution = optionsObject.ContainsKey("resolution") ? optionsObject["resolution"].ToString() : "";
-                var market = optionsObject.ContainsKey("market") ? optionsObject["market"].ToString() : "";
-                var securityType = optionsObject.ContainsKey("security-type")
-                    ? optionsObject["security-type"].ToString()
-                    : "";
+                string market = optionsObject.ContainsKey("market") && optionsObject["market"].ToString() is not null
+                    ? optionsObject["market"].ToString()
+                    : Market.USA;
+                var securityType = optionsObject.ContainsKey("security-type") &&
+                                   optionsObject["security-type"].ToString() is not null
+                    ? Enum.Parse<SecurityType>(optionsObject["security-type"].ToString()!, true)
+                    : SecurityType.Equity;
                 var tickers = ToolboxArgumentParser.GetTickers(optionsObject);
                 var toDate = optionsObject.ContainsKey("to-date")
                     ? Parse.DateTimeExact(optionsObject["to-date"].ToString(), "yyyyMMdd-HH:mm:ss")
@@ -58,7 +61,8 @@ namespace QuantConnect.ExanteBrokerage.ToolBox
                 {
                     case "exntdl":
                     case "exantedownloader":
-                        ExanteDownloaderProgram.DataDownloader(tickers, resolution, fromDate, toDate);
+                        ExanteDownloaderProgram.DataDownloader(tickers, market, securityType, resolution,
+                            fromDate, toDate);
                         break;
 
                     default:
