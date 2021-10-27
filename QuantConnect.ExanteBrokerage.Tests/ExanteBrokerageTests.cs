@@ -89,9 +89,8 @@ namespace QuantConnect.ExanteBrokerage.Tests
                     "StopMarketOrder"),
                 new TestCaseData(new StopLimitOrderTestParameters(Symbols.ETHUSD, 10000m, 0.01m)).SetName(
                     "StopLimitOrder"),
-                // `LimitIfTouchedOrder` Is not supported by Exante
-                // new TestCaseData(new LimitIfTouchedOrderTestParameters(Symbols.BTCUSD, 10000m, 0.01m)).SetName(
-                //    "LimitIfTouchedOrder") 
+                new TestCaseData(new LimitIfTouchedOrderTestParameters(Symbols.ETHUSD, 10000m, 0.01m)).SetName(
+                    "LimitIfTouchedOrder").Ignore("`LimitIfTouchedOrder` Is not supported by Exante"),
             };
         }
 
