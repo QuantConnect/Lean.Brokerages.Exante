@@ -549,7 +549,7 @@ namespace QuantConnect.ExanteBrokerage
         {
             foreach (var symbol in symbols)
             {
-                if (!symbol.IsCanonical())
+                if (!CanSubscribe(symbol))
                 {
                     var ticker = SymbolMapper.GetBrokerageSymbol(symbol);
                     if (!_subscribedTickers.ContainsKey(ticker))
@@ -608,7 +608,7 @@ namespace QuantConnect.ExanteBrokerage
         {
             foreach (var symbol in symbols)
             {
-                if (!symbol.IsCanonical())
+                if (!CanSubscribe(symbol))
                 {
                     var ticker = SymbolMapper.GetBrokerageSymbol(symbol);
                     if (_subscribedTickers.ContainsKey(ticker))
@@ -631,6 +631,11 @@ namespace QuantConnect.ExanteBrokerage
 
         private static bool CanSubscribe(Symbol symbol)
         {
+            if (!symbol.IsCanonical())
+            {
+                return false;
+            }
+
             if (symbol.Value.IndexOfInvariant("universe", true) != -1)
             {
                 return false;
