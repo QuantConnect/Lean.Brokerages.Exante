@@ -641,19 +641,10 @@ namespace QuantConnect.ExanteBrokerage
                 return false;
             }
 
-            var supportedSecurityTypes = new HashSet<SecurityType>
-            {
-                SecurityType.Forex,
-                SecurityType.Equity,
-                SecurityType.Future,
-                SecurityType.Option,
-                SecurityType.Cfd,
-                SecurityType.Index,
-                SecurityType.Crypto,
-            };
-
             // ignore unsupported security types
-            if (!supportedSecurityTypes.Contains(symbol.ID.SecurityType))
+            if (symbol.ID.SecurityType is not
+                (SecurityType.Forex or SecurityType.Equity or SecurityType.Future or SecurityType.Option or
+                SecurityType.Cfd or SecurityType.Index or SecurityType.Crypto))
             {
                 return false;
             }

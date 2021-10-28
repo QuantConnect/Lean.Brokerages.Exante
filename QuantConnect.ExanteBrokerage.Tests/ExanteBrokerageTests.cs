@@ -35,7 +35,7 @@ namespace QuantConnect.ExanteBrokerage.Tests
 
         public ExanteBrokerageTests()
         {
-            Symbol = Symbol.Create("ETH", SecurityType.Crypto, Market.USA);
+            Symbol = Symbol.Create("ETHUSD", SecurityType.Crypto, Market.USA);
 
             var accountId = Config.Get("exante-account-id");
             var exanteClientOptions = ExanteBrokerageFactory.CreateExanteClientOptions();
