@@ -393,10 +393,10 @@ namespace QuantConnect.ExanteBrokerage
                             $"ExanteBrokerage.ConvertOrderType: Unsupported order type: {order.Type}");
                 }
 
-                foreach (var o in orderPlacement.Data)
+                foreach (var exanteOrder in orderPlacement.Data)
                 {
-                    _orderMap[o.OrderId] = order;
-                    order.BrokerId.Add(o.OrderId.ToString());
+                    _orderMap[exanteOrder.OrderId] = order;
+                    order.BrokerId.Add(exanteOrder.OrderId.ToString());
                 }
 
                 if (!orderPlacement.Success)
