@@ -52,10 +52,9 @@ namespace QuantConnect.ExanteBrokerage
         private readonly Dictionary<Symbol, DateTimeZone> _symbolExchangeTimeZones = new();
         private readonly EventBasedDataQueueHandlerSubscriptionManager _subscriptionManager;
         private readonly BrokerageConcurrentMessageHandler<ExanteOrder> _messageHandler;
-        private readonly ConcurrentDictionary<string, Symbol> _subscribedTickers = new();
 
-        private readonly ConcurrentDictionary<string, (ExanteStreamSubscription, ExanteStreamSubscription)>
-            _subscribedTickersStreamSubscriptions = new();
+        private readonly ConcurrentDictionary<string, (Symbol, ExanteStreamSubscription, ExanteStreamSubscription)>
+            _subscribedTickers = new();
 
         /// <summary>
         /// Returns true if we're currently connected to the broker
@@ -600,9 +599,7 @@ namespace QuantConnect.ExanteBrokerage
 
                         if (success)
                         {
-                            _subscribedTickers.TryAdd(ticker, symbol);
-                            _subscribedTickersStreamSubscriptions[ticker] =
-                                (feedQuoteStream.Data, feedTradesStream.Data);
+                            _subscribedTickers.TryAdd(ticker, (symbol, feedQuoteStream.Data, feedTradesStream.Data));
                         }
                         else
                         {
@@ -630,13 +627,9 @@ namespace QuantConnect.ExanteBrokerage
                     var ticker = SymbolMapper.GetBrokerageSymbol(symbol);
                     if (_subscribedTickers.ContainsKey(ticker))
                     {
-                        _subscribedTickers.TryRemove(ticker, out _);
-                    }
-
-                    if (_subscribedTickersStreamSubscriptions.ContainsKey(ticker))
-                    {
-                        _subscribedTickersStreamSubscriptions.TryRemove(ticker,
-                            out (ExanteStreamSubscription stream1, ExanteStreamSubscription stream2) streams);
+                        _subscribedTickers.TryRemove(ticker,
+                            out (Symbol symbol, ExanteStreamSubscription stream1, ExanteStreamSubscription stream2)
+                            streams);
                         Client.StreamClient.StopStream(streams.stream1);
                         Client.StreamClient.StopStream(streams.stream2);
                     }
@@ -678,10 +671,12 @@ namespace QuantConnect.ExanteBrokerage
         private Tick CreateTick(ExanteFeedTrade exanteFeedTrade)
         {
             var symbolId = exanteFeedTrade.SymbolId;
-            if (!_subscribedTickers.TryGetValue(symbolId, out var symbol))
+            if (!_subscribedTickers.TryGetValue(symbolId, out var item))
             {
                 return null; // Not subscribed to this symbol.
             }
+
+            var (symbol, _, _) = item;
 
             if (exanteFeedTrade.Size == decimal.Zero)
             {
@@ -723,11 +718,13 @@ namespace QuantConnect.ExanteBrokerage
         /// <returns>LEAN Tick object</returns>
         private Tick CreateTick(ExanteTickShort exanteTickShort)
         {
-            if (!_subscribedTickers.TryGetValue(exanteTickShort.SymbolId, out var symbol))
+            if (!_subscribedTickers.TryGetValue(exanteTickShort.SymbolId, out var item))
             {
                 // Not subscribed to this symbol.
                 return null;
             }
+
+            var (symbol, _, _) = item;
 
             var time = GetRealTimeTickTime(exanteTickShort.Date, symbol);
             var bids = exanteTickShort.Bid.ToList();
