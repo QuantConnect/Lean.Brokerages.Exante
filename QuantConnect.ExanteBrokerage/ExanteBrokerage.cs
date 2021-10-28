@@ -670,6 +670,11 @@ namespace QuantConnect.ExanteBrokerage
         /// <returns>LEAN Tick object</returns>
         private Tick CreateTick(ExanteFeedTrade exanteFeedTrade)
         {
+            if (exanteFeedTrade.Size == decimal.Zero)
+            {
+                return null;
+            }
+
             var symbolId = exanteFeedTrade.SymbolId;
             if (!_subscribedTickers.TryGetValue(symbolId, out var item))
             {
@@ -677,11 +682,6 @@ namespace QuantConnect.ExanteBrokerage
             }
 
             var (symbol, _, _) = item;
-
-            if (exanteFeedTrade.Size == decimal.Zero)
-            {
-                return null;
-            }
 
             // Convert the timestamp to exchange timezone and pass into algorithm
             var time = GetRealTimeTickTime(exanteFeedTrade.Date, symbol);
