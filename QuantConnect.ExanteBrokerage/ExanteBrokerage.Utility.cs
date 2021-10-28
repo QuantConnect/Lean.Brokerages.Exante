@@ -21,7 +21,8 @@ using QuantConnect.Orders;
 namespace QuantConnect.ExanteBrokerage
 {
     // ToDo: move to `QuantConnect.Extensions`
-    public static class Extensions {
+    public static class Extensions
+    {
         /// <summary>
         /// Lazy string to lower implementation.
         /// Will first verify the string is not already lower and avoid
@@ -37,10 +38,11 @@ namespace QuantConnect.ExanteBrokerage
             {
                 alreadyLower = char.IsLower(data[i]);
             }
+
             return alreadyLower ? data : data.ToLowerInvariant();
         }
     }
-    
+
     public partial class ExanteBrokerage
     {
         /// <summary>
@@ -394,6 +396,12 @@ namespace QuantConnect.ExanteBrokerage
                 {
                     var expiration = symbol.Expiration ?? default(DateTime);
                     sym = SymbolMapper.GetLeanSymbol(symbol.Ticker, securityType, market, expiration);
+                    break;
+                }
+
+                case SecurityType.Crypto:
+                {
+                    sym = SymbolMapper.GetLeanSymbol(symbol.SymbolId.Replace(".", ""), securityType, market);
                     break;
                 }
 

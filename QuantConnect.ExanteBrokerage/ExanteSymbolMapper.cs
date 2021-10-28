@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using QuantConnect.Brokerages;
 using Log = QuantConnect.Logging.Log;
 using System.Linq;
+using QuantConnect.Util;
 
 namespace QuantConnect.ExanteBrokerage
 {
@@ -143,16 +144,35 @@ namespace QuantConnect.ExanteBrokerage
             if (symbol.ID.SecurityType == SecurityType.Forex && ticker.Length != 6)
                 throw new ArgumentException($"Forex symbol length must be equal to 6: {symbol.Value}");
 
-            var symbolId = symbol.ID.SecurityType switch
+            string symbolId;
+            switch (symbol.ID.SecurityType)
             {
-                SecurityType.Option => symbol.Underlying.ID.Symbol,
-                SecurityType.Future => symbol.ID.Symbol,
-                SecurityType.Equity => symbol.ID.Symbol,
-                SecurityType.Index => ticker,
-                SecurityType.Forex => ticker[..3] + "/" + ticker[3..],
-                SecurityType.Crypto => ticker[..3],
-                _ => ticker
-            };
+                case SecurityType.Option:
+                    symbolId = symbol.Underlying.ID.Symbol;
+                    break;
+                case SecurityType.Future:
+                case SecurityType.Equity:
+                    symbolId = symbol.ID.Symbol;
+                    break;
+                case SecurityType.Index:
+                    symbolId = ticker;
+                    break;
+                case SecurityType.Forex:
+                {
+                    CurrencyPairUtil.DecomposeCurrencyPair(symbol, out var baseCurrency, out var quoteCurrency);
+                    symbolId = $"{baseCurrency}/{quoteCurrency}";
+                    break;
+                }
+                case SecurityType.Crypto:
+                {
+                    CurrencyPairUtil.DecomposeCurrencyPair(symbol, out var baseCurrency, out _);
+                    symbolId = baseCurrency;
+                    break;
+                }
+                default:
+                    symbolId = ticker;
+                    break;
+            }
 
             symbolId = symbolId.LazyToUpper();
 
