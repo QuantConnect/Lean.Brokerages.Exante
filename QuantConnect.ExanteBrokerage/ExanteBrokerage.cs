@@ -88,7 +88,8 @@ namespace QuantConnect.ExanteBrokerage
         /// </summary>
         /// <remarks>This parameterless constructor is required for brokerages implementing <see cref="IDataQueueHandler"/></remarks>
         public ExanteBrokerage()
-            : this(ExanteBrokerageFactory.CreateExanteClientOptions(), Config.Get("exante-account-id"), Composer.Instance.GetPart<IDataAggregator>())
+            : this(ExanteBrokerageFactory.CreateExanteClientOptions(), Config.Get("exante-account-id"),
+                Composer.Instance.GetPart<IDataAggregator>())
         {
         }
 
@@ -776,6 +777,7 @@ namespace QuantConnect.ExanteBrokerage
             if (exanteOrder.OrderState.Status == ExanteOrderStatus.Filled)
             {
                 orderEvent.FillQuantity = exanteOrder.OrderParameters.Quantity;
+                _messageHandler.WithLockedStream(() => { _orderMap.TryRemove(exanteOrder.OrderId, out _); });
             }
 
             OnOrderEvent(orderEvent);
