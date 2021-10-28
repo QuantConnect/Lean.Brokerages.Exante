@@ -547,6 +547,24 @@ namespace QuantConnect.ExanteBrokerage
         /// <param name="tickType">Type of tick data</param>
         private bool Subscribe(IEnumerable<Symbol> symbols, TickType tickType)
         {
+            void OnNewQuote(ExanteTickShort tickShort)
+            {
+                var tick = CreateTick(tickShort);
+                if (tick != null)
+                {
+                    _aggregator.Update(tick);
+                }
+            }
+
+            void OnNewTrade(ExanteFeedTrade feedTrade)
+            {
+                var tick = CreateTick(feedTrade);
+                if (tick != null)
+                {
+                    _aggregator.Update(tick);
+                }
+            }
+
             foreach (var symbol in symbols)
             {
                 if (!CanSubscribe(symbol))
@@ -556,17 +574,9 @@ namespace QuantConnect.ExanteBrokerage
                     {
                         var success = true;
 
-                        var feedQuoteStream = Client.StreamClient.GetFeedQuoteStreamAsync(
-                            new[] { ticker },
-                            tickShort =>
-                            {
-                                var tick = CreateTick(tickShort);
-                                if (tick != null)
-                                {
-                                    _aggregator.Update(tick);
-                                }
-                            },
-                            level: ExanteQuoteLevel.BestPrice).SynchronouslyAwaitTaskResult();
+                        var feedQuoteStream =
+                            Client.StreamClient.GetFeedQuoteStreamAsync(new[] { ticker }, OnNewQuote,
+                                level: ExanteQuoteLevel.BestPrice).SynchronouslyAwaitTaskResult();
                         if (!feedQuoteStream.Success)
                         {
                             Log.Error(
@@ -576,16 +586,9 @@ namespace QuantConnect.ExanteBrokerage
                             success = false;
                         }
 
-                        var feedTradesStream = Client.StreamClient.GetFeedTradesStreamAsync(
-                            new[] { ticker },
-                            feedTrade =>
-                            {
-                                var tick = CreateTick(feedTrade);
-                                if (tick != null)
-                                {
-                                    _aggregator.Update(tick);
-                                }
-                            }).SynchronouslyAwaitTaskResult();
+                        var feedTradesStream =
+                            Client.StreamClient.GetFeedTradesStreamAsync(new[] { ticker }, OnNewTrade)
+                                .SynchronouslyAwaitTaskResult();
                         if (!feedTradesStream.Success)
                         {
                             Log.Error(
