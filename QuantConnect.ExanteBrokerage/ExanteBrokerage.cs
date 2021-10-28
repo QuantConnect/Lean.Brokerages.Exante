@@ -554,7 +554,8 @@ namespace QuantConnect.ExanteBrokerage
                     var ticker = SymbolMapper.GetBrokerageSymbol(symbol);
                     if (!_subscribedTickers.ContainsKey(ticker))
                     {
-                        _subscribedTickers.TryAdd(ticker, symbol);
+                        var success = true;
+
                         var feedQuoteStream = Client.StreamClient.GetFeedQuoteStreamAsync(
                             new[] { ticker },
                             tickShort =>
@@ -572,6 +573,7 @@ namespace QuantConnect.ExanteBrokerage
                                 $"Exante.StreamClient.GetFeedQuoteStreamAsync({ticker}): " +
                                 $"Error: {feedQuoteStream.Error}"
                             );
+                            success = false;
                         }
 
                         var feedTradesStream = Client.StreamClient.GetFeedTradesStreamAsync(
@@ -590,9 +592,21 @@ namespace QuantConnect.ExanteBrokerage
                                 $"Exante.StreamClient.GetFeedTradesStreamAsync({ticker}): " +
                                 $"Error: {feedTradesStream.Error}"
                             );
+                            success = false;
                         }
 
-                        _subscribedTickersStreamSubscriptions[ticker] = (feedQuoteStream.Data, feedTradesStream.Data);
+                        if (success)
+                        {
+                            _subscribedTickers.TryAdd(ticker, symbol);
+                            _subscribedTickersStreamSubscriptions[ticker] =
+                                (feedQuoteStream.Data, feedTradesStream.Data);
+                        }
+                        else
+                        {
+                            new[] { feedQuoteStream, feedTradesStream }
+                                .Where(stream => stream is { Success: true })
+                                .DoForEach(stream => Client.StreamClient.StopStream(stream.Data));
+                        }
                     }
                 }
             }
