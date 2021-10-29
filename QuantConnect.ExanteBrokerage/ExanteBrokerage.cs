@@ -425,6 +425,8 @@ namespace QuantConnect.ExanteBrokerage
             }
 
             var updateResult = true;
+            // `Skip(1)` because LEAN always places orders that results in a single order at Exante
+            // See details at https://github.com/QuantConnect/Lean.Brokerages.Exante/pull/2#discussion_r739521819
             foreach (var bi in order.BrokerId.Skip(1))
             {
                 var d = Client.ModifyOrder(Guid.Parse(bi), ExanteOrderAction.Cancel);
@@ -434,11 +436,14 @@ namespace QuantConnect.ExanteBrokerage
             _messageHandler.WithLockedStream(() =>
             {
                 WebCallResult<ExanteOrder> exanteOrder;
+                // `order.BrokerId.First()` because LEAN always places orders that results in a single order at Exante
+                // See details at https://github.com/QuantConnect/Lean.Brokerages.Exante/pull/2#discussion_r739521819
+                var orderId = Guid.Parse(order.BrokerId.First());
                 switch (order.Type)
                 {
                     case OrderType.Market:
                         exanteOrder = Client.ModifyOrder(
-                            Guid.Parse(order.BrokerId.First()),
+                            orderId,
                             ExanteOrderAction.Replace,
                             order.Quantity);
                         break;
@@ -446,7 +451,7 @@ namespace QuantConnect.ExanteBrokerage
                     case OrderType.Limit:
                         var limitOrder = (LimitOrder)order;
                         exanteOrder = Client.ModifyOrder(
-                            Guid.Parse(order.BrokerId.First()),
+                            orderId,
                             ExanteOrderAction.Replace,
                             order.Quantity,
                             limitPrice: limitOrder.LimitPrice);
@@ -455,7 +460,7 @@ namespace QuantConnect.ExanteBrokerage
                     case OrderType.StopMarket:
                         var stopMarketOrder = (StopMarketOrder)order;
                         exanteOrder = Client.ModifyOrder(
-                            Guid.Parse(order.BrokerId.First()),
+                            orderId,
                             ExanteOrderAction.Replace,
                             order.Quantity,
                             stopPrice: stopMarketOrder.StopPrice);
@@ -464,7 +469,7 @@ namespace QuantConnect.ExanteBrokerage
                     case OrderType.StopLimit:
                         var stopLimitOrder = (StopLimitOrder)order;
                         exanteOrder = Client.ModifyOrder(
-                            Guid.Parse(order.BrokerId.First()),
+                            orderId,
                             ExanteOrderAction.Replace,
                             order.Quantity,
                             limitPrice: stopLimitOrder.LimitPrice,
