@@ -53,12 +53,9 @@ namespace QuantConnect.ExanteBrokerage.Tests
             TestDelegate test = () =>
             {
                 var accountId = Config.Get("exante-account-id");
-                var exanteClientOptions = ExanteBrokerageFactory.CreateExanteClientOptions();
+                var options = ExanteBrokerageOptions.FromConfig();
 
-                var brokerage = new ExanteBrokerage(
-                    exanteClientOptions,
-                    accountId,
-                    new AggregationManager());
+                var brokerage = new ExanteBrokerage(options, new AggregationManager());
 
                 var historyProvider = new BrokerageHistoryProvider();
                 historyProvider.SetBrokerage(brokerage);

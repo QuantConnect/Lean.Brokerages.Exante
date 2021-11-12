@@ -19,8 +19,6 @@ using QuantConnect.Brokerages;
 using QuantConnect.Interfaces;
 using QuantConnect.Securities;
 using System.Collections.Generic;
-using Exante.Net;
-using Exante.Net.Enums;
 using QLNet;
 using QuantConnect.Configuration;
 using QuantConnect.Data;
@@ -61,39 +59,6 @@ namespace QuantConnect.ExanteBrokerage
             return new ExanteBrokerageModel();
         }
 
-        public static ExanteClientOptions CreateExanteClientOptions()
-        {
-            return CreateExanteClientOptions(Config.Get("exante-client-id"),
-                Config.Get("exante-application-id"),
-                Config.Get("exante-shared-key"),
-                Config.Get("exante-platform-type"));
-        }
-
-        public static ExanteClientOptions CreateExanteClientOptions(
-            string clientId,
-            string applicationId,
-            string sharedKey,
-            string platformTypeStr
-        )
-        {
-            var platformTypeParsed = Enum.TryParse(platformTypeStr, true, out ExantePlatformType platformType);
-            if (!platformTypeParsed)
-            {
-                throw new Exception($"ExantePlatformType parse error: {platformTypeStr}");
-            }
-
-            var exanteClientOptions =
-                new ExanteClientOptions(
-                    new ExanteApiCredentials(
-                        clientId,
-                        applicationId,
-                        sharedKey
-                    ),
-                    platformType
-                );
-            return exanteClientOptions;
-        }
-
         /// <summary>
         /// Creates a new IBrokerage instance
         /// </summary>
@@ -109,7 +74,7 @@ namespace QuantConnect.ExanteBrokerage
             var applicationId = Read<string>(job.BrokerageData, "exante-application-id", errors);
             var sharedKey = Read<string>(job.BrokerageData, "exante-shared-key", errors);
             var accountId = Read<string>(job.BrokerageData, "exante-account-id", errors);
-            var platformTypeStr = Read<string>(job.BrokerageData, "exante-platform-type", errors);
+            var platformType = Read<string>(job.BrokerageData, "exante-platform-type", errors);
 
             if (!errors.empty())
             {
@@ -117,13 +82,12 @@ namespace QuantConnect.ExanteBrokerage
                 throw new ArgumentException(string.Join(Environment.NewLine, errors));
             }
 
-            var clientOptions = CreateExanteClientOptions(clientId, applicationId, sharedKey, platformTypeStr);
+            var options = new ExanteBrokerageOptions(accountId, clientId, applicationId, sharedKey, platformType);
+            var aggregator = Composer.Instance.GetExportedValueByTypeName<IDataAggregator>(
+                Config.Get("data-aggregator", "QuantConnect.Lean.Engine.DataFeeds.AggregationManager")
+            );
 
-            var brokerage = new ExanteBrokerage(
-                clientOptions,
-                accountId,
-                Composer.Instance.GetExportedValueByTypeName<IDataAggregator>(Config.Get("data-aggregator",
-                    "QuantConnect.Lean.Engine.DataFeeds.AggregationManager")));
+            var brokerage = new ExanteBrokerage(options, aggregator);
             Composer.Instance.AddPart<IDataQueueHandler>(brokerage);
 
             return brokerage;

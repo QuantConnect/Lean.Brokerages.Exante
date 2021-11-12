@@ -37,13 +37,9 @@ namespace QuantConnect.ExanteBrokerage.Tests
         {
             Symbol = Symbol.Create("ETHUSD", SecurityType.Crypto, Market.USA);
 
-            var accountId = Config.Get("exante-account-id");
-            var exanteClientOptions = ExanteBrokerageFactory.CreateExanteClientOptions();
+            var options = ExanteBrokerageOptions.FromConfig();
 
-            _brokerage = new ExanteBrokerage(
-                exanteClientOptions,
-                accountId,
-                new AggregationManager());
+            _brokerage = new ExanteBrokerage(options, new AggregationManager());
         }
 
         protected override IBrokerage CreateBrokerage(IOrderProvider orderProvider, ISecurityProvider securityProvider)

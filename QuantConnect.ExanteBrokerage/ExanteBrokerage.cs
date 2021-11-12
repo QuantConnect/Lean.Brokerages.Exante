@@ -23,7 +23,6 @@ using QuantConnect.Interfaces;
 using QuantConnect.Securities;
 using QuantConnect.Brokerages;
 using System.Collections.Generic;
-using Exante.Net;
 using Exante.Net.Objects;
 using Exante.Net.Enums;
 using QuantConnect.Util;
@@ -35,7 +34,6 @@ using Log = QuantConnect.Logging.Log;
 using QuantConnect.Data.Market;
 using CryptoExchange.Net.Objects;
 using Newtonsoft.Json.Linq;
-using QuantConnect.Configuration;
 
 namespace QuantConnect.ExanteBrokerage
 {
@@ -46,12 +44,12 @@ namespace QuantConnect.ExanteBrokerage
     public partial class ExanteBrokerage : Brokerage, IDataQueueHandler
     {
         private bool _isConnected;
-        private readonly string _accountId;
         private readonly IDataAggregator _aggregator;
         private readonly ConcurrentDictionary<Guid, Order> _orderMap = new();
         private readonly Dictionary<Symbol, DateTimeZone> _symbolExchangeTimeZones = new();
         private readonly EventBasedDataQueueHandlerSubscriptionManager _subscriptionManager;
         private readonly BrokerageConcurrentMessageHandler<ExanteOrder> _messageHandler;
+        private readonly ExanteBrokerageOptions _options;
 
         private readonly ConcurrentDictionary<string, (Symbol, ExanteStreamSubscription, ExanteStreamSubscription)>
             _subscribedTickers = new();
@@ -87,7 +85,7 @@ namespace QuantConnect.ExanteBrokerage
         /// </summary>
         /// <remarks>This parameterless constructor is required for brokerages implementing <see cref="IDataQueueHandler"/></remarks>
         public ExanteBrokerage()
-            : this(ExanteBrokerageFactory.CreateExanteClientOptions(), Config.Get("exante-account-id"),
+            : this(ExanteBrokerageOptions.FromConfig(),
                 Composer.Instance.GetPart<IDataAggregator>())
         {
         }
@@ -95,16 +93,15 @@ namespace QuantConnect.ExanteBrokerage
         /// <summary>
         /// Creates a new ExanteBrokerage
         /// </summary>
-        /// <param name="client">Exante client options to create REST API client instance</param>
-        /// <param name="accountId">Exante account id</param>
+        /// <param name="options">Exante brokerage options. Required to create REST API client instance</param>
         /// <param name="aggregator">consolidate ticks</param>
         public ExanteBrokerage(
-            ExanteClientOptions client,
-            string accountId,
+            ExanteBrokerageOptions options,
             IDataAggregator aggregator) : base("ExanteBrokerage")
         {
-            Client = new ExanteClientWrapper(client);
-            _accountId = accountId;
+            _options = options;
+
+            Client = new ExanteClientWrapper(_options.ExanteClientOptions());
 
             _aggregator = aggregator;
             _subscriptionManager = new EventBasedDataQueueHandlerSubscriptionManager();
@@ -254,7 +251,7 @@ namespace QuantConnect.ExanteBrokerage
         /// <returns>The current holdings from the account</returns>
         public override List<Holding> GetAccountHoldings()
         {
-            var accountSummary = Client.GetAccountSummary(_accountId, AccountBaseCurrency);
+            var accountSummary = Client.GetAccountSummary(_options.AccountId, AccountBaseCurrency);
             var positions = accountSummary.Positions
                 .Where(position => position.Quantity != 0)
                 .Select(ConvertHolding)
@@ -268,7 +265,7 @@ namespace QuantConnect.ExanteBrokerage
         /// <returns>The current cash balance for each currency available for trading</returns>
         public override List<CashAmount> GetCashBalance()
         {
-            var accountSummary = Client.GetAccountSummary(_accountId, AccountBaseCurrency);
+            var accountSummary = Client.GetAccountSummary(_options.AccountId, AccountBaseCurrency);
             var cashAmounts =
                 from currencyData in accountSummary.Currencies
                 select new CashAmount(currencyData.Value, currencyData.Currency);
@@ -334,7 +331,7 @@ namespace QuantConnect.ExanteBrokerage
                 {
                     case OrderType.Market:
                         orderPlacement = Client.PlaceOrder(
-                            _accountId,
+                            _options.AccountId,
                             SymbolMapper.GetBrokerageSymbol(order.Symbol),
                             ExanteOrderType.Market,
                             orderSide,
@@ -347,7 +344,7 @@ namespace QuantConnect.ExanteBrokerage
                     case OrderType.Limit:
                         var limitOrder = (LimitOrder)order;
                         orderPlacement = Client.PlaceOrder(
-                            _accountId,
+                            _options.AccountId,
                             SymbolMapper.GetBrokerageSymbol(order.Symbol),
                             ExanteOrderType.Limit,
                             orderSide,
@@ -361,7 +358,7 @@ namespace QuantConnect.ExanteBrokerage
                     case OrderType.StopMarket:
                         var stopMarketOrder = (StopMarketOrder)order;
                         orderPlacement = Client.PlaceOrder(
-                            _accountId,
+                            _options.AccountId,
                             SymbolMapper.GetBrokerageSymbol(order.Symbol),
                             ExanteOrderType.Stop,
                             orderSide,
@@ -375,7 +372,7 @@ namespace QuantConnect.ExanteBrokerage
                     case OrderType.StopLimit:
                         var stopLimitOrder = (StopLimitOrder)order;
                         orderPlacement = Client.PlaceOrder(
-                            _accountId,
+                            _options.AccountId,
                             SymbolMapper.GetBrokerageSymbol(order.Symbol),
                             ExanteOrderType.Stop,
                             orderSide,
