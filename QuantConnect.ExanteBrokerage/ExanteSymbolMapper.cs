@@ -124,6 +124,11 @@ namespace QuantConnect.ExanteBrokerage
             return GetExanteSymbol(symbol).Id;
         }
 
+        /// <summary>
+        /// Converts an Exante symbol instance to a Lean symbol
+        /// </summary>
+        /// <param name="symbol">A Lean symbol instance</param>
+        /// <returns>Instance of a class that represents Exante ticker</returns>
         public ExanteSymbolLocal GetExanteSymbol(Symbol symbol)
         {
             var ticker = symbol.ID.Symbol;
@@ -241,6 +246,11 @@ namespace QuantConnect.ExanteBrokerage
             return symbol;
         }
 
+        /// <summary>
+        /// Returns Exante exchange name for Lean symbol
+        /// </summary>
+        /// <param name="symbol">Lean symbol</param>
+        /// <returns>Exante exchange name</returns>
         public string GetExchange(Symbol symbol)
         {
             var brokerageSymbol = GetExanteSymbol(symbol);
@@ -248,6 +258,21 @@ namespace QuantConnect.ExanteBrokerage
             if (!_leanSymbolIdToExanteExchange.TryGetValue(brokerageSymbol.SymbolId, out var exchange))
             {
                 throw new ArgumentException($"Unknown exchange for symbol '{symbol}'");
+            }
+
+            return exchange;
+        }
+
+        /// <summary>
+        /// Returns Exante exchange name of Exante symbol ticker
+        /// </summary>
+        /// <param name="exanteSymbolTicker">Exante symbol ticker</param>
+        /// <returns>Exante exchange name</returns>
+        public string GetExchange(string exanteSymbolTicker)
+        {
+            if (!_leanSymbolIdToExanteExchange.TryGetValue(exanteSymbolTicker, out var exchange))
+            {
+                throw new ArgumentException($"Unknown exchange for symbol '{exanteSymbolTicker}'");
             }
 
             return exchange;
