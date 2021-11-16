@@ -162,7 +162,7 @@ namespace QuantConnect.ExanteBrokerage
         /// </summary>
         /// <param name="symbol">Exante symbol</param>
         /// <returns>Symbol market</returns>
-        private static string GetSymbolMarket(ExanteSymbol symbol)
+        private string GetSymbolMarket(ExanteSymbol symbol)
         {
             switch (symbol.SymbolType)
             {
@@ -255,14 +255,18 @@ namespace QuantConnect.ExanteBrokerage
                 case ExanteSymbolType.Option:
                 {
                     const string unknownOptionMarket = "";
-                    var exchange = symbol.Exchange.LazyToLower();
                     string market;
-                    if (exchange == Market.CBOE ||
-                        exchange == Market.CME ||
-                        exchange == Market.COMEX ||
-                        exchange == Market.NYMEX ||
-                        exchange == Market.CBOE ||
-                        exchange == Market.SGX)
+                    var exchange = symbol.Exchange.LazyToLower();
+                    var underlyingSymbolExchange = SymbolMapper.GetExchange(symbol.Ticker);
+                    if (underlyingSymbolExchange is
+                        ExanteMarket.NASDAQ or ExanteMarket.ARCA or ExanteMarket.AMEX or
+                        ExanteMarket.USD or ExanteMarket.USCORP)
+                    {
+                        market = Market.USA;
+                    }
+                    else if (exchange is
+                             Market.CBOE or Market.CME or Market.COMEX or
+                             Market.NYMEX or Market.SGX)
                     {
                         market = exchange;
                     }
