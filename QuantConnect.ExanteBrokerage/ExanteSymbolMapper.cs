@@ -85,7 +85,24 @@ namespace QuantConnect.ExanteBrokerage
                     {
                         if (market != tickerToExchange[sym])
                         {
-                            Log.Error($"Symbol {sym} occurs on two exchanges: {tickerToExchange[sym]} {market}");
+                            var usMarkets = new HashSet<string>
+                            {
+                                ExanteMarket.NASDAQ, ExanteMarket.USD, ExanteMarket.ARCA, ExanteMarket.AMEX,
+                                ExanteMarket.OTCMKTS, Market.CME, Market.CBOE, Market.CBOT, Market.NYMEX, Market.COMEX,
+                                Market.ICE
+                            };
+                            if (usMarkets.Contains(market))
+                            {
+                                Log.Debug(
+                                    $"Symbol {sym} occurs on two exchanges. " +
+                                    $"But it's OK since they both US: {tickerToExchange[sym]} {market}");
+                            }
+                            else
+                            {
+                                Log.Error(
+                                    $"Symbol {sym} occurs on two exchanges. " +
+                                    $"One of them or both are not US: {tickerToExchange[sym]} {market}");
+                            }
                         }
                     }
                     else
