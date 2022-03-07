@@ -26,7 +26,6 @@ using System.Collections.Generic;
 using Exante.Net.Objects;
 using Exante.Net.Enums;
 using QuantConnect.Util;
-using System.Threading;
 using NodaTime;
 using QuantConnect.Orders.Fees;
 using QuantConnect.Orders.TimeInForces;
@@ -34,6 +33,7 @@ using Log = QuantConnect.Logging.Log;
 using QuantConnect.Data.Market;
 using CryptoExchange.Net.Objects;
 using Newtonsoft.Json.Linq;
+using QuantConnect.Tests.Brokerages;
 
 namespace QuantConnect.ExanteBrokerage
 {
@@ -50,6 +50,8 @@ namespace QuantConnect.ExanteBrokerage
         private readonly EventBasedDataQueueHandlerSubscriptionManager _subscriptionManager;
         private readonly BrokerageConcurrentMessageHandler<ExanteOrder> _messageHandler;
         private readonly ExanteBrokerageOptions _options;
+        private readonly ExanteFeeModel _feeModel = new();
+        private readonly ISecurityProvider _securityProvider = new SecurityProvider();
 
         private readonly ConcurrentDictionary<string, (Symbol, ExanteStreamSubscription, ExanteStreamSubscription)>
             _subscribedTickers = new();
@@ -748,16 +750,12 @@ namespace QuantConnect.ExanteBrokerage
                 return;
             }
 
-            Thread.Sleep(1_000); // Need to wait for `Client.GetTransactions(...)`
+            var exanteSymbol = Client.GetSymbol(exanteOrder.OrderParameters.SymbolId);
+            var symbol = ConvertSymbol(exanteSymbol);
 
-            var transactions = Client.GetTransactions(
-                orderId: exanteOrder.OrderId, types: new[] { ExanteTransactionType.Commission }
-            );
-
-            var commission = transactions.Data.FirstOrDefault();
-            var fee = commission == null
-                ? OrderFee.Zero
-                : new OrderFee(new CashAmount(commission.Amount, commission.Asset));
+            var security = _securityProvider.GetSecurity(symbol);
+            var orderFeeParameters =  new OrderFeeParameters(security, order);
+            var fee = _feeModel.GetOrderFee(orderFeeParameters);
 
             var orderEvent = new OrderEvent(order, DateTime.UtcNow, fee)
             {
