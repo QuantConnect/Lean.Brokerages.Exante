@@ -271,13 +271,7 @@ namespace QuantConnect.ExanteBrokerage
         public string GetExchange(Symbol symbol)
         {
             var brokerageSymbol = GetExanteSymbol(symbol);
-
-            if (!_leanSymbolIdToExanteExchange.TryGetValue(brokerageSymbol.SymbolId, out var exchange))
-            {
-                throw new ArgumentException($"Unknown exchange for symbol '{symbol}'");
-            }
-
-            return exchange;
+            return GetExchange(brokerageSymbol.SymbolId);
         }
 
         /// <summary>
@@ -297,7 +291,7 @@ namespace QuantConnect.ExanteBrokerage
 
         private static string ConvertExanteSymbolToLeanSymbol(string exanteSymbol)
         {
-            return exanteSymbol.Replace("/", "");
+            return exanteSymbol.Replace("/", string.Empty);
         }
     }
 }
