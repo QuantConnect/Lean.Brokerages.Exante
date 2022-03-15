@@ -52,7 +52,7 @@ namespace QuantConnect.ExanteBrokerage.ToolBox
                     var symbol = downloader.GetSymbol(ticker, market, securityType);
                     foreach (var castResolution in resolutions)
                     {
-                        var data = downloader.Get(symbol, castResolution, fromDate, toDate);
+                        var data = downloader.Get(new DataDownloaderGetParameters(symbol, castResolution, fromDate, toDate));
 
                         // Save the data (single resolution)
                         var writer = new LeanDataWriter(castResolution, symbol, Globals.DataFolder);

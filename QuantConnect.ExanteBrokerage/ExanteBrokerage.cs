@@ -33,7 +33,6 @@ using Log = QuantConnect.Logging.Log;
 using QuantConnect.Data.Market;
 using CryptoExchange.Net.Objects;
 using Newtonsoft.Json.Linq;
-using QuantConnect.Tests.Brokerages;
 
 namespace QuantConnect.ExanteBrokerage
 {
@@ -50,8 +49,7 @@ namespace QuantConnect.ExanteBrokerage
         private readonly EventBasedDataQueueHandlerSubscriptionManager _subscriptionManager;
         private readonly BrokerageConcurrentMessageHandler<ExanteOrder> _messageHandler;
         private readonly ExanteBrokerageOptions _options;
-        private readonly ExanteFeeModel _feeModel = new();
-        private readonly ISecurityProvider _securityProvider = new SecurityProvider();
+        private readonly ISecurityProvider _securityProvider;
 
         private readonly ConcurrentDictionary<string, (Symbol, ExanteStreamSubscription, ExanteStreamSubscription)>
             _subscribedTickers = new();
@@ -88,7 +86,8 @@ namespace QuantConnect.ExanteBrokerage
         /// <remarks>This parameterless constructor is required for brokerages implementing <see cref="IDataQueueHandler"/></remarks>
         public ExanteBrokerage()
             : this(ExanteBrokerageOptions.FromConfig(),
-                Composer.Instance.GetPart<IDataAggregator>())
+                Composer.Instance.GetPart<IDataAggregator>(),
+                null)
         {
         }
 
@@ -97,15 +96,18 @@ namespace QuantConnect.ExanteBrokerage
         /// </summary>
         /// <param name="options">Exante brokerage options. Required to create REST API client instance</param>
         /// <param name="aggregator">consolidate ticks</param>
+        /// <param name="securityProvider">Security provider instance to use</param>
         public ExanteBrokerage(
             ExanteBrokerageOptions options,
-            IDataAggregator aggregator) : base("ExanteBrokerage")
+            IDataAggregator aggregator,
+            ISecurityProvider securityProvider) : base("ExanteBrokerage")
         {
             _options = options;
 
             Client = new ExanteClientWrapper(_options.ExanteClientOptions());
 
             _aggregator = aggregator;
+            _securityProvider = securityProvider;
             _subscriptionManager = new EventBasedDataQueueHandlerSubscriptionManager();
             _subscriptionManager.SubscribeImpl += Subscribe;
             _subscriptionManager.UnsubscribeImpl += (s, _) => Unsubscribe(s);
@@ -292,7 +294,7 @@ namespace QuantConnect.ExanteBrokerage
             ExanteOrderDuration orderDuration;
             switch (order.TimeInForce)
             {
-                case GoodTilCanceledTimeInForce _:
+                case GoodTilCanceledTimeInForce:
                     // NOTE:
                     // GTC order duration is not available for market orders due to its specifics.
                     //
@@ -310,7 +312,7 @@ namespace QuantConnect.ExanteBrokerage
                     };
 
                     break;
-                case DayTimeInForce _:
+                case DayTimeInForce:
                     orderDuration = ExanteOrderDuration.Day;
                     break;
                 case GoodTilDateTimeInForce goodTilDateTimeInForce:
@@ -755,7 +757,7 @@ namespace QuantConnect.ExanteBrokerage
 
             var security = _securityProvider.GetSecurity(symbol);
             var orderFeeParameters =  new OrderFeeParameters(security, order);
-            var fee = _feeModel.GetOrderFee(orderFeeParameters);
+            var fee = security.FeeModel.GetOrderFee(orderFeeParameters);
 
             var orderEvent = new OrderEvent(order, DateTime.UtcNow, fee)
             {
@@ -778,18 +780,18 @@ namespace QuantConnect.ExanteBrokerage
             {
                 TickType.Quote => ExanteTickType.Quotes,
                 TickType.Trade => ExanteTickType.Trades,
-                TickType.OpenInterest => throw new ArgumentException(),
-                _ => throw new ArgumentOutOfRangeException()
+                TickType.OpenInterest => throw new ArgumentException($"Unsupported TickType requested {request.TickType}"),
+                _ => throw new ArgumentOutOfRangeException($"Unexpected TickType {request.TickType}")
             };
 
             var exanteTimeframe = request.Resolution switch
             {
-                Resolution.Tick => throw new ArgumentException(),
-                Resolution.Second => throw new ArgumentException(),
+                Resolution.Tick => throw new ArgumentException($"Unsupported Resolution requested {request.Resolution}"),
+                Resolution.Second => throw new ArgumentException($"Unsupported Resolution requested {request.Resolution}"),
                 Resolution.Minute => ExanteCandleTimeframe.Minute1,
                 Resolution.Hour => ExanteCandleTimeframe.Hour1,
                 Resolution.Daily => ExanteCandleTimeframe.Day1,
-                _ => throw new ArgumentOutOfRangeException()
+                _ => throw new ArgumentOutOfRangeException($"Unexpected Resolution {request.Resolution}")
             };
 
             var history = Client.GetCandles(
@@ -804,7 +806,7 @@ namespace QuantConnect.ExanteBrokerage
 
             foreach (var kline in history)
             {
-                yield return new TradeBar()
+                yield return new TradeBar
                 {
                     Time = kline.Date,
                     Symbol = request.Symbol,
@@ -827,13 +829,7 @@ namespace QuantConnect.ExanteBrokerage
         /// <returns>An enumerable of bars covering the span specified in the request</returns>
         public override IEnumerable<BaseData> GetHistory(Data.HistoryRequest request)
         {
-            return request.Resolution switch
-            {
-                Resolution.Tick => throw new ArgumentException(),
-                Resolution.Second => throw new ArgumentException(),
-                Resolution.Minute or Resolution.Hour or Resolution.Daily => GetCandlesHistory(request),
-                _ => throw new ArgumentOutOfRangeException()
-            };
+            return GetCandlesHistory(request);
         }
     }
 }

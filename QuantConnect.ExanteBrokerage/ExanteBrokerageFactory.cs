@@ -84,10 +84,11 @@ namespace QuantConnect.ExanteBrokerage
 
             var options = new ExanteBrokerageOptions(accountId, clientId, applicationId, sharedKey, platformType);
             var aggregator = Composer.Instance.GetExportedValueByTypeName<IDataAggregator>(
-                Config.Get("data-aggregator", "QuantConnect.Lean.Engine.DataFeeds.AggregationManager")
+                Config.Get("data-aggregator", "QuantConnect.Lean.Engine.DataFeeds.AggregationManager"),
+                forceTypeNameOnExisting: false
             );
 
-            var brokerage = new ExanteBrokerage(options, aggregator);
+            var brokerage = new ExanteBrokerage(options, aggregator, algorithm.Portfolio);
             Composer.Instance.AddPart<IDataQueueHandler>(brokerage);
 
             return brokerage;

@@ -39,7 +39,7 @@ namespace QuantConnect.ExanteBrokerage.Tests
 
             var options = ExanteBrokerageOptions.FromConfig();
 
-            _brokerage = new ExanteBrokerage(options, new AggregationManager());
+            _brokerage = new ExanteBrokerage(options, new AggregationManager(), new SecurityProvider());
         }
 
         protected override IBrokerage CreateBrokerage(IOrderProvider orderProvider, ISecurityProvider securityProvider)
