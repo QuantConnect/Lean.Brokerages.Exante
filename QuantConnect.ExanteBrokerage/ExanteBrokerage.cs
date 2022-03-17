@@ -1,4 +1,4 @@
-﻿/*
+/*
  * QUANTCONNECT.COM - Democratizing Finance, Empowering Individuals.
  * Lean Algorithmic Trading Engine v2.0. Copyright 2014 QuantConnect Corporation.
  *
@@ -756,7 +756,7 @@ namespace QuantConnect.ExanteBrokerage
             var symbol = ConvertSymbol(exanteSymbol);
 
             var security = _securityProvider.GetSecurity(symbol);
-            var orderFeeParameters =  new OrderFeeParameters(security, order);
+            var orderFeeParameters = new OrderFeeParameters(security, order);
             var fee = security.FeeModel.GetOrderFee(orderFeeParameters);
 
             var orderEvent = new OrderEvent(order, DateTime.UtcNow, fee)

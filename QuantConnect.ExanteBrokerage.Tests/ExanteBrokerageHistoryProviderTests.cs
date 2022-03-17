@@ -52,7 +52,6 @@ namespace QuantConnect.ExanteBrokerage.Tests
         {
             TestDelegate test = () =>
             {
-                var accountId = Config.Get("exante-account-id");
                 var options = ExanteBrokerageOptions.FromConfig();
 
                 var brokerage = new ExanteBrokerage(options, new AggregationManager(), null);
