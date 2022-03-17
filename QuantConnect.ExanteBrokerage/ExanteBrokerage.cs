@@ -806,18 +806,32 @@ namespace QuantConnect.ExanteBrokerage
 
             foreach (var kline in history)
             {
-                yield return new TradeBar
+                yield return request.TickType switch
                 {
-                    Time = kline.Date,
-                    Symbol = request.Symbol,
-                    Low = kline.Low,
-                    High = kline.High,
-                    Open = kline.Open,
-                    Close = kline.Close,
-                    Volume = kline.Volume ?? 0m,
-                    Value = kline.Close,
-                    DataType = MarketDataType.TradeBar,
-                    Period = period,
+                    TickType.Quote =>
+                        new QuoteBar
+                        {
+                            Time = kline.Date,
+                            Symbol = request.Symbol,
+                            Value = kline.Close,
+                            DataType = MarketDataType.TradeBar,
+                            Period = period,
+                        },
+                    TickType.Trade =>
+                        new TradeBar
+                        {
+                            Time = kline.Date,
+                            Symbol = request.Symbol,
+                            Low = kline.Low,
+                            High = kline.High,
+                            Open = kline.Open,
+                            Close = kline.Close,
+                            Volume = kline.Volume ?? 0m,
+                            Value = kline.Close,
+                            DataType = MarketDataType.TradeBar,
+                            Period = period,
+                        },
+                    _ => throw new ArgumentOutOfRangeException()
                 };
             }
         }
