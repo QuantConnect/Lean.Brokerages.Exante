@@ -88,7 +88,7 @@ namespace QuantConnect.ExanteBrokerage
                 forceTypeNameOnExisting: false
             );
 
-            var brokerage = new ExanteBrokerage(options, aggregator, algorithm.Portfolio);
+            var brokerage = new ExanteBrokerage(options, aggregator, algorithm?.Portfolio);
             Composer.Instance.AddPart<IDataQueueHandler>(brokerage);
 
             return brokerage;
