@@ -87,7 +87,7 @@ namespace QuantConnect.ExanteBrokerage
         public ExanteBrokerage()
             : this(ExanteBrokerageOptions.FromConfig(),
                 Composer.Instance.GetPart<IDataAggregator>(),
-                null)
+                new ExanteSecurityProvider())
         {
         }
 
