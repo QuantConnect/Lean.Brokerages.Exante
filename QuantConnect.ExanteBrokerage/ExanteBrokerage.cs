@@ -815,22 +815,15 @@ namespace QuantConnect.ExanteBrokerage
                             Time = kline.Date,
                             Symbol = request.Symbol,
                             Value = kline.Close,
-                            DataType = MarketDataType.TradeBar,
+                            DataType = MarketDataType.QuoteBar,
                             Period = period,
                         },
                     TickType.Trade =>
-                        new TradeBar
+                        new TradeBar(kline.Date, request.Symbol, kline.Open, kline.High, kline.Low, kline.Close,
+                            kline.Volume ?? 0m, period)
                         {
-                            Time = kline.Date,
-                            Symbol = request.Symbol,
-                            Low = kline.Low,
-                            High = kline.High,
-                            Open = kline.Open,
-                            Close = kline.Close,
-                            Volume = kline.Volume ?? 0m,
                             Value = kline.Close,
                             DataType = MarketDataType.TradeBar,
-                            Period = period,
                         },
                     _ => throw new ArgumentOutOfRangeException()
                 };
