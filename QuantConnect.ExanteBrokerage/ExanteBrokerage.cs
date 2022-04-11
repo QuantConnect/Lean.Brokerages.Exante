@@ -155,7 +155,11 @@ namespace QuantConnect.ExanteBrokerage
         /// <param name="job">Job we're subscribing for</param>
         public void SetJob(LiveNodePacket job)
         {
-            new ExanteBrokerageFactory().CreateBrokerage(job, null);
+            var brokerage = new ExanteBrokerageFactory().CreateBrokerage(job, null);
+            if (!brokerage.IsConnected)
+            {
+                brokerage.Connect();
+            }
         }
 
         #endregion
