@@ -59,13 +59,7 @@ namespace QuantConnect.ExanteBrokerage
             return new ExanteBrokerageModel();
         }
 
-        /// <summary>
-        /// Creates a new IBrokerage instance
-        /// </summary>
-        /// <param name="job">The job packet to create the brokerage for</param>
-        /// <param name="algorithm">The algorithm instance</param>
-        /// <returns>A new brokerage instance</returns>
-        public override IBrokerage CreateBrokerage(LiveNodePacket job, IAlgorithm algorithm)
+        public static (ExanteBrokerageOptions, IDataAggregator) GetBrokerageConfig(LiveNodePacket job)
         {
             var errors = new List<string>();
 
@@ -88,6 +82,18 @@ namespace QuantConnect.ExanteBrokerage
                 forceTypeNameOnExisting: false
             );
 
+            return (options, aggregator);
+        }
+
+        /// <summary>
+        /// Creates a new IBrokerage instance
+        /// </summary>
+        /// <param name="job">The job packet to create the brokerage for</param>
+        /// <param name="algorithm">The algorithm instance</param>
+        /// <returns>A new brokerage instance</returns>
+        public override IBrokerage CreateBrokerage(LiveNodePacket job, IAlgorithm algorithm)
+        {
+            var (options, aggregator) = GetBrokerageConfig(job);
             var brokerage = new ExanteBrokerage(options, aggregator, algorithm?.Portfolio);
             Composer.Instance.AddPart<IDataQueueHandler>(brokerage);
 

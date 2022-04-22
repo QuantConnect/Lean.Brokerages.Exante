@@ -43,13 +43,14 @@ namespace QuantConnect.ExanteBrokerage
     public partial class ExanteBrokerage : Brokerage, IDataQueueHandler
     {
         private bool _isConnected;
-        private readonly IDataAggregator _aggregator;
+        private IDataAggregator _aggregator;
         private readonly ConcurrentDictionary<Guid, Order> _orderMap = new();
         private readonly Dictionary<Symbol, DateTimeZone> _symbolExchangeTimeZones = new();
-        private readonly EventBasedDataQueueHandlerSubscriptionManager _subscriptionManager;
-        private readonly BrokerageConcurrentMessageHandler<ExanteOrder> _messageHandler;
-        private readonly ExanteBrokerageOptions _options;
-        private readonly ISecurityProvider _securityProvider;
+        private EventBasedDataQueueHandlerSubscriptionManager _subscriptionManager;
+        private BrokerageConcurrentMessageHandler<ExanteOrder> _messageHandler;
+        private ExanteBrokerageOptions _options;
+        private ISecurityProvider _securityProvider;
+        private bool IsInitialized { get; set; }
 
         private readonly ConcurrentDictionary<string, (Symbol, ExanteStreamSubscription, ExanteStreamSubscription)>
             _subscribedTickers = new();
@@ -67,12 +68,12 @@ namespace QuantConnect.ExanteBrokerage
         /// <summary>
         /// Provides the mapping between Lean symbols and Exante symbols.
         /// </summary>
-        public ExanteSymbolMapper SymbolMapper { get; }
+        public ExanteSymbolMapper SymbolMapper { get; private set; }
 
         /// <summary>
         /// Instance of the wrapper class for a Exante REST API client
         /// </summary>
-        public ExanteClientWrapper Client { get; }
+        public ExanteClientWrapper Client { get; private set; }
 
         public static readonly HashSet<string> SupportedCryptoCurrencies = new()
         {
@@ -102,12 +103,27 @@ namespace QuantConnect.ExanteBrokerage
             IDataAggregator aggregator,
             ISecurityProvider securityProvider) : base("ExanteBrokerage")
         {
+            Initialize(options, aggregator, securityProvider);
+        }
+
+        private void Initialize(
+            ExanteBrokerageOptions options,
+            IDataAggregator aggregator,
+            ISecurityProvider securityProvider)
+        {
+            if (IsInitialized)
+            {
+                return;
+            }
+
+            IsInitialized = true;
+
             _options = options;
+            _aggregator = aggregator;
+            _securityProvider = securityProvider;
 
             Client = new ExanteClientWrapper(_options.ExanteClientOptions());
 
-            _aggregator = aggregator;
-            _securityProvider = securityProvider;
             _subscriptionManager = new EventBasedDataQueueHandlerSubscriptionManager();
             _subscriptionManager.SubscribeImpl += Subscribe;
             _subscriptionManager.UnsubscribeImpl += (s, _) => Unsubscribe(s);
@@ -155,10 +171,11 @@ namespace QuantConnect.ExanteBrokerage
         /// <param name="job">Job we're subscribing for</param>
         public void SetJob(LiveNodePacket job)
         {
-            var brokerage = new ExanteBrokerageFactory().CreateBrokerage(job, null);
-            if (!brokerage.IsConnected)
+            var (options, aggregator) = ExanteBrokerageFactory.GetBrokerageConfig(job);
+            Initialize(options, aggregator, null);
+            if (!IsConnected)
             {
-                brokerage.Connect();
+                Connect();
             }
         }
 
@@ -785,14 +802,17 @@ namespace QuantConnect.ExanteBrokerage
             {
                 TickType.Quote => ExanteTickType.Quotes,
                 TickType.Trade => ExanteTickType.Trades,
-                TickType.OpenInterest => throw new ArgumentException($"Unsupported TickType requested {request.TickType}"),
+                TickType.OpenInterest => throw new ArgumentException(
+                    $"Unsupported TickType requested {request.TickType}"),
                 _ => throw new ArgumentOutOfRangeException($"Unexpected TickType {request.TickType}")
             };
 
             var exanteTimeframe = request.Resolution switch
             {
-                Resolution.Tick => throw new ArgumentException($"Unsupported Resolution requested {request.Resolution}"),
-                Resolution.Second => throw new ArgumentException($"Unsupported Resolution requested {request.Resolution}"),
+                Resolution.Tick =>
+                    throw new ArgumentException($"Unsupported Resolution requested {request.Resolution}"),
+                Resolution.Second => throw new ArgumentException(
+                    $"Unsupported Resolution requested {request.Resolution}"),
                 Resolution.Minute => ExanteCandleTimeframe.Minute1,
                 Resolution.Hour => ExanteCandleTimeframe.Hour1,
                 Resolution.Daily => ExanteCandleTimeframe.Day1,
