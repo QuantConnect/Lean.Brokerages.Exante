@@ -796,14 +796,17 @@ namespace QuantConnect.ExanteBrokerage
 
         private IEnumerable<BaseData> GetCandlesHistory(Data.HistoryRequest request)
         {
+            // Exante API only allows us to support history requests for TickType.Trade
+            if (request.TickType != TickType.Trade)
+            {
+                yield break;
+            }
+            
             var symbol = SymbolMapper.GetBrokerageSymbol(request.Symbol);
 
             var exanteTickType = request.TickType switch
             {
-                TickType.Quote => ExanteTickType.Quotes,
                 TickType.Trade => ExanteTickType.Trades,
-                TickType.OpenInterest => throw new ArgumentException(
-                    $"Unsupported TickType requested {request.TickType}"),
                 _ => throw new ArgumentOutOfRangeException($"Unexpected TickType {request.TickType}")
             };
 
@@ -831,17 +834,8 @@ namespace QuantConnect.ExanteBrokerage
 
             foreach (var kline in history)
             {
-                yield return request.TickType switch
+                var tradeBar = request.TickType switch
                 {
-                    TickType.Quote =>
-                        new QuoteBar
-                        {
-                            Time = kline.Date,
-                            Symbol = request.Symbol,
-                            Value = kline.Close,
-                            DataType = MarketDataType.QuoteBar,
-                            Period = period,
-                        },
                     TickType.Trade =>
                         new TradeBar(kline.Date, request.Symbol, kline.Open, kline.High, kline.Low, kline.Close,
                             kline.Volume ?? 0m, period)
@@ -849,8 +843,9 @@ namespace QuantConnect.ExanteBrokerage
                             Value = kline.Close,
                             DataType = MarketDataType.TradeBar,
                         },
-                    _ => throw new ArgumentOutOfRangeException()
+                    _ => throw new ArgumentOutOfRangeException($"Unexpected TickType {request.TickType}")
                 };
+                yield return tradeBar;
             }
         }
 
