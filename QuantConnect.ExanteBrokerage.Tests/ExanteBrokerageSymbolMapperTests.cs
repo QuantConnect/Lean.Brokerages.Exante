@@ -14,6 +14,7 @@
 */
 
 using NUnit.Framework;
+using QuantConnect.Tests;
 
 namespace QuantConnect.ExanteBrokerage.Tests
 {
@@ -43,7 +44,7 @@ namespace QuantConnect.ExanteBrokerage.Tests
         {
             var mapper = SymbolMapper();
 
-            var symbol = Symbol.Create("EURUSD", SecurityType.Forex, Market.Oanda);
+            var symbol = Symbols.EURUSD;
             var brokerageSymbol = mapper.GetBrokerageSymbol(symbol);
             Assert.AreEqual("EUR/USD.EXANTE", brokerageSymbol);
         }

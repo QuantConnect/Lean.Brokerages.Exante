@@ -33,9 +33,9 @@ namespace QuantConnect.ExanteBrokerage.Tests
                 return new[]
                 {
                     // valid parameters, for example
-                    new TestCaseData(Symbols.BTCUSD, Resolution.Tick, false),
-                    new TestCaseData(Symbols.BTCUSD, Resolution.Minute, false),
-                    new TestCaseData(Symbols.BTCUSD, Resolution.Second, false),
+                    new TestCaseData(Symbols.EURUSD, Resolution.Tick, false),
+                    new TestCaseData(Symbols.EURUSD, Resolution.Minute, false),
+                    new TestCaseData(Symbols.EURUSD, Resolution.Second, false),
                 };
             }
         }

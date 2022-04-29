@@ -36,13 +36,13 @@ namespace QuantConnect.ExanteBrokerage.Tests
                 return new[]
                 {
                     // valid parameters, example:
-                    new TestCaseData(Symbols.BTCUSD, Resolution.Tick, TimeSpan.FromMinutes(1), TickType.Quote, typeof(Tick), true),
-                    new TestCaseData(Symbols.BTCUSD, Resolution.Minute, TimeSpan.FromMinutes(10), TickType.Quote, typeof(QuoteBar), false),
-                    new TestCaseData(Symbols.BTCUSD, Resolution.Daily, TimeSpan.FromDays(10), TickType.Quote, typeof(QuoteBar), false),
+                    new TestCaseData(Symbols.EURUSD, Resolution.Tick, TimeSpan.FromMinutes(1), TickType.Quote, typeof(Tick), false),
+                    new TestCaseData(Symbols.EURUSD, Resolution.Minute, TimeSpan.FromMinutes(10), TickType.Quote, typeof(QuoteBar), false),
+                    new TestCaseData(Symbols.EURUSD, Resolution.Daily, TimeSpan.FromDays(10), TickType.Quote, typeof(QuoteBar), false),
 
-                    new TestCaseData(Symbols.BTCUSD, Resolution.Tick, TimeSpan.FromMinutes(1), TickType.Trade, typeof(Tick), true),
-                    new TestCaseData(Symbols.BTCUSD, Resolution.Minute, TimeSpan.FromMinutes(10), TickType.Trade, typeof(TradeBar), false),
-                    new TestCaseData(Symbols.BTCUSD, Resolution.Daily, TimeSpan.FromDays(10), TickType.Trade, typeof(TradeBar), false),
+                    new TestCaseData(Symbols.EURUSD, Resolution.Tick, TimeSpan.FromMinutes(1), TickType.Trade, typeof(Tick), true),
+                    new TestCaseData(Symbols.EURUSD, Resolution.Minute, TimeSpan.FromMinutes(10), TickType.Trade, typeof(TradeBar), false),
+                    new TestCaseData(Symbols.EURUSD, Resolution.Daily, TimeSpan.FromDays(10), TickType.Trade, typeof(TradeBar), false),
                 };
             }
         }
