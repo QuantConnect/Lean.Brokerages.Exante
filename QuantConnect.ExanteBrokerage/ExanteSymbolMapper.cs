@@ -60,14 +60,11 @@ namespace QuantConnect.ExanteBrokerage
     {
         private readonly Dictionary<string, string> _leanSymbolIdToExanteExchange;
         private readonly ExanteClientWrapper _client;
-        private readonly HashSet<string> _supportedCryptoCurrencies;
 
         public ExanteSymbolMapper(
-            ExanteClientWrapper client,
-            HashSet<string> supportedCryptoCurrencies)
+            ExanteClientWrapper client)
         {
             _client = client;
-            _supportedCryptoCurrencies = supportedCryptoCurrencies;
             _leanSymbolIdToExanteExchange = ComposeTickerToExchangeDictionary();
         }
 
@@ -126,8 +123,6 @@ namespace QuantConnect.ExanteBrokerage
                     m => _client.GetSymbolsByExchange(m).Data.Select(x => x.Ticker).ToList());
             }
 
-            AddMarketSymbols("USD", m => _supportedCryptoCurrencies.ToList());
-
             return tickerToExchange;
         }
 
@@ -159,7 +154,6 @@ namespace QuantConnect.ExanteBrokerage
                 symbol.ID.SecurityType != SecurityType.Option &&
                 symbol.ID.SecurityType != SecurityType.Future &&
                 symbol.ID.SecurityType != SecurityType.Cfd &&
-                symbol.ID.SecurityType != SecurityType.Crypto &&
                 symbol.ID.SecurityType != SecurityType.Index)
                 throw new ArgumentException($"Invalid security type: {symbol.ID.SecurityType}");
 
@@ -183,12 +177,6 @@ namespace QuantConnect.ExanteBrokerage
                 {
                     CurrencyPairUtil.DecomposeCurrencyPair(symbol, out var baseCurrency, out var quoteCurrency);
                     symbolId = $"{baseCurrency}/{quoteCurrency}";
-                    break;
-                }
-                case SecurityType.Crypto:
-                {
-                    CurrencyPairUtil.DecomposeCurrencyPair(symbol, out var baseCurrency, out _);
-                    symbolId = baseCurrency;
                     break;
                 }
                 default:
@@ -237,8 +225,7 @@ namespace QuantConnect.ExanteBrokerage
                 securityType != SecurityType.IndexOption &&
                 securityType != SecurityType.Future &&
                 securityType != SecurityType.FutureOption &&
-                securityType != SecurityType.Cfd &&
-                securityType != SecurityType.Crypto)
+                securityType != SecurityType.Cfd)
             {
                 throw new ArgumentException("Invalid security type: " + securityType);
             }

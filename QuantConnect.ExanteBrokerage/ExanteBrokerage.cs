@@ -75,12 +75,6 @@ namespace QuantConnect.ExanteBrokerage
         /// </summary>
         public ExanteClientWrapper Client { get; private set; }
 
-        public static readonly HashSet<string> SupportedCryptoCurrencies = new()
-        {
-            "ETC", "MKR", "BNB", "NEO", "IOTA", "QTUM", "XMR", "EOS", "ETH", "XRP", "DCR",
-            "XLM", "ZRX", "BTC", "XAI", "ZEC", "BAT", "BCH", "VEO", "DEFIX", "OMG", "LTC", "DASH"
-        };
-
         /// <summary>
         /// Parameterless constructor for brokerage
         /// </summary>
@@ -128,7 +122,7 @@ namespace QuantConnect.ExanteBrokerage
             _subscriptionManager.SubscribeImpl += Subscribe;
             _subscriptionManager.UnsubscribeImpl += (s, _) => Unsubscribe(s);
 
-            SymbolMapper = new ExanteSymbolMapper(Client, SupportedCryptoCurrencies);
+            SymbolMapper = new ExanteSymbolMapper(Client);
             _messageHandler = new BrokerageConcurrentMessageHandler<ExanteOrder>(OnUserMessage);
 
             Client.StreamClient.GetOrdersStreamAsync(exanteOrder => { _messageHandler.HandleNewMessage(exanteOrder); });
@@ -682,7 +676,7 @@ namespace QuantConnect.ExanteBrokerage
             // ignore unsupported security types
             if (symbol.ID.SecurityType is not
                 (SecurityType.Forex or SecurityType.Equity or SecurityType.Future or SecurityType.Option or
-                SecurityType.Cfd or SecurityType.Index or SecurityType.Crypto))
+                SecurityType.Cfd or SecurityType.Index))
             {
                 return false;
             }

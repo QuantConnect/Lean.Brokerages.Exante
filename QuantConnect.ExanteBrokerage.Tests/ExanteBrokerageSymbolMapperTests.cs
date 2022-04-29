@@ -22,9 +22,8 @@ namespace QuantConnect.ExanteBrokerage.Tests
     {
         ExanteSymbolMapper SymbolMapper()
         {
-            var supportedCryptoCurrencies = ExanteBrokerage.SupportedCryptoCurrencies;
             var clientWrapper = new ExanteClientWrapper(ExanteBrokerageOptions.FromConfig().ExanteClientOptions());
-            var symbolMapper = new ExanteSymbolMapper(clientWrapper, supportedCryptoCurrencies);
+            var symbolMapper = new ExanteSymbolMapper(clientWrapper);
             return symbolMapper;
         }
 

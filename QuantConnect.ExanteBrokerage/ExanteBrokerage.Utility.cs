@@ -212,12 +212,6 @@ namespace QuantConnect.ExanteBrokerage
                     return unknownBondMarket;
                 }
 
-                case ExanteSymbolType.Fund when SupportedCryptoCurrencies.Contains(symbol.Ticker):
-                {
-                    const string unknownCryptoMarket = "EXANTE";
-                    return unknownCryptoMarket;
-                }
-
                 case ExanteSymbolType.Fund:
                 {
                     const string unknownFundMarket = "";
@@ -335,9 +329,6 @@ namespace QuantConnect.ExanteBrokerage
                 case ExanteSymbolType.Option:
                     return SecurityType.Option;
 
-                case ExanteSymbolType.CFD when SupportedCryptoCurrencies.Contains(symbol.Ticker):
-                    return SecurityType.Crypto;
-
                 case ExanteSymbolType.CFD:
                     return SecurityType.Cfd;
 
@@ -400,12 +391,6 @@ namespace QuantConnect.ExanteBrokerage
                 {
                     var expiration = symbol.Expiration ?? default(DateTime);
                     sym = SymbolMapper.GetLeanSymbol(symbol.Ticker, securityType, market, expiration);
-                    break;
-                }
-
-                case SecurityType.Crypto:
-                {
-                    sym = SymbolMapper.GetLeanSymbol(symbol.SymbolId.Replace(".", ""), securityType, market);
                     break;
                 }
 

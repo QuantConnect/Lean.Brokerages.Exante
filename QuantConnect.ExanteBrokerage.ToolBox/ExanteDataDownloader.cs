@@ -32,9 +32,8 @@ namespace QuantConnect.ExanteBrokerage.ToolBox
         /// </summary>
         public ExanteDataDownloader()
         {
-            var supportedCryptoCurrencies = ExanteBrokerage.SupportedCryptoCurrencies;
             _clientWrapper = new ExanteClientWrapper(ExanteBrokerageOptions.FromConfig().ExanteClientOptions());
-            _symbolMapper = new ExanteSymbolMapper(_clientWrapper, supportedCryptoCurrencies);
+            _symbolMapper = new ExanteSymbolMapper(_clientWrapper);
         }
 
         /// <summary>
