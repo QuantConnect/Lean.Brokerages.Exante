@@ -32,5 +32,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Lean\Brokerages\QuantConnect.Brokerages.csproj" />
     <ProjectReference Include="..\..\Lean\Common\QuantConnect.csproj" />
+    <ProjectReference Include="..\..\Lean\Tests\QuantConnect.Tests.csproj" />
   </ItemGroup>
 </Project>
