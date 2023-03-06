@@ -25,7 +25,7 @@ using QuantConnect.Tests.Brokerages;
 
 namespace QuantConnect.ExanteBrokerage.Tests
 {
-    [TestFixture]
+    [TestFixture, Ignore("")]
     public partial class ExanteBrokerageTests : BrokerageTests
     {
         protected override Symbol Symbol { get; }

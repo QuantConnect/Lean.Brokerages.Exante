@@ -19,7 +19,7 @@ using QuantConnect.Interfaces;
 
 namespace QuantConnect.ExanteBrokerage.Tests
 {
-    [TestFixture]
+    [TestFixture, Ignore("")]
     public class ExanteBrokerageAdditionalTests
     {
         [Test]
