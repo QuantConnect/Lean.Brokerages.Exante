@@ -9,6 +9,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-20.04
+    env:
+      QC_EXANTE_CLIENT_ID: ${{ secrets.QC_EXANTE_CLIENT_ID }}
+      QC_EXANTE_APPLICATION_ID: ${{ secrets.QC_EXANTE_APPLICATION_ID }}
+      QC_EXANTE_SHARED_KEY: ${{ secrets.QC_EXANTE_SHARED_KEY }}
+      QC_EXANTE_ACCOUNT_ID: ${{ secrets.QC_EXANTE_ACCOUNT_ID }}
+      QC_EXANTE_PLATFORM_TYPE: ${{ secrets.QC_EXANTE_PLATFORM_TYPE }}
     container:
         image: quantconnect/lean:foundation
     steps:
