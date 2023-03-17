@@ -20,6 +20,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      # - name: Test Exante API
+      #  run: |
+      #    curl -X GET "https://api-demo.exante.eu/md/3.0/accounts" -H "Authorization: ${{ secrets.QC_EXANTE_BEARER_TOKEN }}"
+
       - name: Checkout Lean Same Branch
         id: lean-same-branch
         uses: actions/checkout@v3
@@ -40,7 +44,7 @@ jobs:
         run: mv Lean ../Lean
 
       - name: Build
-        run: dotnet build /p:Configuration=Release /v:quiet /p:WarningLevel=1 QuantConnect.ExanteBrokerage.sln
+        run: dotnet build /p:Configuration=Debug /v:quiet /p:WarningLevel=1 QuantConnect.ExanteBrokerage.sln
 
       - name: Run Tests
-        run: dotnet test ./QuantConnect.ExanteBrokerage.Tests/bin/Release/QuantConnect.ExanteBrokerage.Tests.dll
+        run: dotnet test ./QuantConnect.ExanteBrokerage.Tests/bin/Debug/QuantConnect.ExanteBrokerage.Tests.dll

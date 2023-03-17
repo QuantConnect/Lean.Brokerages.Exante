@@ -5,7 +5,6 @@ using QuantConnect.Configuration;
 
 namespace QuantConnect.ExanteBrokerage.Tests;
 
-[TestFixture]
 public class ExanteClientTest
 {
     private static ExanteClient CreateExanteClient()
@@ -29,12 +28,12 @@ public class ExanteClientTest
     }
 
     [Test]
-    public void PingWorks()
+    public void AccountSummaryWorks()
     {
         var exanteClient = CreateExanteClient();
-        var pingResult = exanteClient.Ping();
+        var accountId = Config.Get("exante-account-id");
+        var accountSummary = exanteClient.GetAccountSummaryAsync(accountId, "USD").Result;
 
-        Assert.IsTrue(pingResult.Success);
-        Assert.IsTrue(pingResult.Data > 0);
+        Assert.IsTrue(accountSummary.Success);
     }
 }
