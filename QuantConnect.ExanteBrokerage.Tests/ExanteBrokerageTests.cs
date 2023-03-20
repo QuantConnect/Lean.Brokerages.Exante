@@ -33,9 +33,14 @@ namespace QuantConnect.ExanteBrokerage.Tests
         private readonly ExanteBrokerage _brokerage;
         private decimal? _askPrice;
 
+        protected override decimal GetDefaultQuantity()
+        {
+            return 1000;
+        }
+
         public ExanteBrokerageTests()
         {
-            Symbol = Symbols.EURUSD;
+            Symbol = Symbol.Create("0175", SecurityType.Equity, Market.HKFE); // GEELY.HKFE
 
             var options = ExanteBrokerageOptions.FromConfig();
 

@@ -27,6 +27,7 @@ namespace QuantConnect.ExanteBrokerage
         public const string NASDAQ = "NASDAQ";
         public const string ARCA = "ARCA";
         public const string AMEX = "AMEX";
+        public const string HKEX = "HKEX";
         public const string EXANTE = "EXANTE";
         public const string USD = "USD";
         public const string USCORP = "USCORP";
@@ -111,7 +112,7 @@ namespace QuantConnect.ExanteBrokerage
 
             foreach (var market in new[]
             {
-                ExanteMarket.NASDAQ, ExanteMarket.ARCA, ExanteMarket.AMEX, ExanteMarket.EXANTE,
+                ExanteMarket.NASDAQ, ExanteMarket.ARCA, ExanteMarket.AMEX, ExanteMarket.EXANTE, ExanteMarket.HKEX,
 #if !DEBUG
                 ExanteMarket.USD, ExanteMarket.USCORP, ExanteMarket.EUR, ExanteMarket.GBP,
                 ExanteMarket.ASN, ExanteMarket.CAD, ExanteMarket.AUD, ExanteMarket.ARG,
