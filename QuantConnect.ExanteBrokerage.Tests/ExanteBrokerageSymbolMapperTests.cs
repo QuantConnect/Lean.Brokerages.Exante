@@ -18,7 +18,7 @@ using QuantConnect.Tests;
 
 namespace QuantConnect.ExanteBrokerage.Tests
 {
-    [TestFixture, Ignore("")]
+    [TestFixture]
     public class ExanteBrokerageSymbolMapperTests
     {
         ExanteSymbolMapper SymbolMapper()

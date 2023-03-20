@@ -26,7 +26,7 @@ using QuantConnect.Lean.Engine.DataFeeds;
 
 namespace QuantConnect.ExanteBrokerage.Tests
 {
-    [TestFixture, Ignore("")]
+    [TestFixture]
     public class ExanteBrokerageHistoryProviderTests
     {
         private static TestCaseData[] TestParameters

@@ -16,7 +16,6 @@
 using System;
 using System.Linq;
 using NUnit.Framework;
-using QuantConnect.Configuration;
 using QuantConnect.Tests;
 using QuantConnect.Interfaces;
 using QuantConnect.Lean.Engine.DataFeeds;
@@ -25,7 +24,7 @@ using QuantConnect.Tests.Brokerages;
 
 namespace QuantConnect.ExanteBrokerage.Tests
 {
-    [TestFixture, Ignore("")]
+    [TestFixture]
     public partial class ExanteBrokerageTests : BrokerageTests
     {
         protected override Symbol Symbol { get; }
