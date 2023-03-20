@@ -23,6 +23,7 @@ using CryptoExchange.Net.Objects;
 using Exante.Net;
 using Exante.Net.Enums;
 using Exante.Net.Objects;
+using QuantConnect.Util;
 
 namespace QuantConnect.ExanteBrokerage
 {
@@ -33,6 +34,7 @@ namespace QuantConnect.ExanteBrokerage
     {
         private readonly ConcurrentDictionary<string, ExanteSymbol> _symbolIdToSymbolCache = new();
         private readonly ExanteClient _client;
+        private static readonly RateGate ExanteClientRateLimiter = new(1, TimeSpan.FromMinutes(1.15));
 
         /// <summary>Get Exante client for stream data</summary>
         public ExanteStreamClient StreamClient { get; private set; }
@@ -176,6 +178,8 @@ namespace QuantConnect.ExanteBrokerage
             CancellationToken ct = default(CancellationToken)
         )
         {
+            ExanteClientRateLimiter.WaitToProceed();
+
             var response = _client.GetCandlesAsync(
                 symbolId,
                 timeframe,
