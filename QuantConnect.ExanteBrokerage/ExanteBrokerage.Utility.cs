@@ -169,8 +169,8 @@ namespace QuantConnect.ExanteBrokerage
                 case ExanteSymbolType.FXSpot:
                 case ExanteSymbolType.Currency:
                 {
-                    const string unknownForexMarket = "";
-                    return unknownForexMarket;
+                    const string unknownCurrencyMarket = Market.USA;
+                    return unknownCurrencyMarket;
                 }
 
                 case ExanteSymbolType.Index:

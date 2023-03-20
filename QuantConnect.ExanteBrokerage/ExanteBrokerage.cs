@@ -321,7 +321,7 @@ namespace QuantConnect.ExanteBrokerage
                     orderDuration = SymbolMapper.GetExchange(order.Symbol) switch
                     {
                         ExanteMarket.USD => ExanteOrderDuration.GoodTillCancel,
-                        ExanteMarket.ARCA => ExanteOrderDuration.GoodTillCancel,
+                        ExanteMarket.ARCA => ExanteOrderDuration.Day,
                         ExanteMarket.NASDAQ => ExanteOrderDuration.GoodTillCancel,
                         ExanteMarket.AMEX => ExanteOrderDuration.GoodTillCancel,
                         _ => ExanteOrderDuration.Day
@@ -795,7 +795,7 @@ namespace QuantConnect.ExanteBrokerage
             {
                 yield break;
             }
-            
+
             var symbol = SymbolMapper.GetBrokerageSymbol(request.Symbol);
 
             var exanteTickType = request.TickType switch
