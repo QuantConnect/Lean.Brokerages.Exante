@@ -43,8 +43,11 @@ jobs:
       - name: Move Lean
         run: mv Lean ../Lean
 
+      - name: Restore dependencies
+        run: dotnet restore
+
       - name: Build
-        run: dotnet build /p:Configuration=Debug /v:quiet /p:WarningLevel=1 QuantConnect.ExanteBrokerage.sln
+        run: dotnet build /p:Configuration=Release /v:quiet /p:WarningLevel=1 QuantConnect.ExanteBrokerage.sln
 
       - name: Run Tests
-        run: dotnet test ./QuantConnect.ExanteBrokerage.Tests/bin/Debug/QuantConnect.ExanteBrokerage.Tests.dll
+        run: dotnet test ./QuantConnect.ExanteBrokerage.Tests/bin/Release/QuantConnect.ExanteBrokerage.Tests.dll
