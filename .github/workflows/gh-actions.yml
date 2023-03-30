@@ -9,14 +9,24 @@ on:
 jobs:
   build:
     runs-on: ubuntu-20.04
+    env:
+      QC_EXANTE_CLIENT_ID: ${{ secrets.QC_EXANTE_CLIENT_ID }}
+      QC_EXANTE_APPLICATION_ID: ${{ secrets.QC_EXANTE_APPLICATION_ID }}
+      QC_EXANTE_SHARED_KEY: ${{ secrets.QC_EXANTE_SHARED_KEY }}
+      QC_EXANTE_ACCOUNT_ID: ${{ secrets.QC_EXANTE_ACCOUNT_ID }}
+      QC_EXANTE_PLATFORM_TYPE: ${{ secrets.QC_EXANTE_PLATFORM_TYPE }}
     container:
         image: quantconnect/lean:foundation
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+
+      # - name: Test Exante API
+      #  run: |
+      #    curl -X GET "https://api-demo.exante.eu/md/3.0/accounts" -H "Authorization: ${{ secrets.QC_EXANTE_BEARER_TOKEN }}"
 
       - name: Checkout Lean Same Branch
         id: lean-same-branch
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         continue-on-error: true
         with:
           ref: ${{ github.ref }}
@@ -25,7 +35,7 @@ jobs:
 
       - name: Checkout Lean Master
         if: steps.lean-same-branch.outcome != 'success'
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: QuantConnect/Lean
           path: Lean
@@ -33,8 +43,11 @@ jobs:
       - name: Move Lean
         run: mv Lean ../Lean
 
+      - name: Restore dependencies
+        run: dotnet restore
+
       - name: Build
-        run: dotnet build /p:Configuration=Release /v:quiet /p:WarningLevel=1 QuantConnect.TemplateBrokerage.sln
+        run: dotnet build /p:Configuration=Release /v:quiet /p:WarningLevel=1 QuantConnect.ExanteBrokerage.sln
 
       - name: Run Tests
-        run: dotnet test ./QuantConnect.TemplateBrokerage.Tests/bin/Release/QuantConnect.TemplateBrokerage.Tests.dll
+        run: dotnet test ./QuantConnect.ExanteBrokerage.Tests/bin/Release/QuantConnect.ExanteBrokerage.Tests.dll

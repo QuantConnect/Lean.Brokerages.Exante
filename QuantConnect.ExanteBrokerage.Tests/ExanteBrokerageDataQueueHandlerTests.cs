@@ -19,11 +19,12 @@ using QuantConnect.Data;
 using QuantConnect.Tests;
 using QuantConnect.Logging;
 using QuantConnect.Data.Market;
+using QuantConnect.ExanteBrokerage;
 
-namespace QuantConnect.TemplateBrokerage.Tests
+namespace QuantConnect.ExanteBrokerage.Tests
 {
     [TestFixture]
-    public partial class TemplateBrokerageTests
+    public partial class ExanteBrokerageTests
     {
         private static TestCaseData[] TestParameters
         {
@@ -32,9 +33,9 @@ namespace QuantConnect.TemplateBrokerage.Tests
                 return new[]
                 {
                     // valid parameters, for example
-                    new TestCaseData(Symbols.BTCUSD, Resolution.Tick, false),
-                    new TestCaseData(Symbols.BTCUSD, Resolution.Minute, false),
-                    new TestCaseData(Symbols.BTCUSD, Resolution.Second, false),
+                    new TestCaseData(Symbols.EURUSD, Resolution.Tick, false),
+                    new TestCaseData(Symbols.EURUSD, Resolution.Minute, false),
+                    new TestCaseData(Symbols.EURUSD, Resolution.Second, false),
                 };
             }
         }
@@ -43,7 +44,7 @@ namespace QuantConnect.TemplateBrokerage.Tests
         public void StreamsData(Symbol symbol, Resolution resolution, bool throwsException)
         {
             var cancelationToken = new CancellationTokenSource();
-            var brokerage = (TemplateBrokerage)Brokerage;
+            var brokerage = (ExanteBrokerage)Brokerage;
 
             SubscriptionDataConfig[] configs;
             if (resolution == Resolution.Tick)

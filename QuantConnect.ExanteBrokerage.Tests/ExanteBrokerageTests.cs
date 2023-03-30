@@ -13,32 +13,66 @@
  * limitations under the License.
 */
 
+using System;
+using System.Linq;
 using NUnit.Framework;
 using QuantConnect.Tests;
 using QuantConnect.Interfaces;
+using QuantConnect.Lean.Engine.DataFeeds;
 using QuantConnect.Securities;
 using QuantConnect.Tests.Brokerages;
 
-namespace QuantConnect.TemplateBrokerage.Tests
+namespace QuantConnect.ExanteBrokerage.Tests
 {
-    [TestFixture, Ignore("Not implemented")]
-    public partial class TemplateBrokerageTests : BrokerageTests
+    [TestFixture]
+    public partial class ExanteBrokerageTests : BrokerageTests
     {
         protected override Symbol Symbol { get; }
         protected override SecurityType SecurityType { get; }
+        private readonly ExanteBrokerage _brokerage;
+        private decimal? _askPrice;
+
+        protected override decimal GetDefaultQuantity()
+        {
+            return 1000;
+        }
+
+        public ExanteBrokerageTests()
+        {
+            Symbol = Symbol.Create("0175", SecurityType.Equity, Market.HKFE); // GEELY.HKFE
+
+            var options = ExanteBrokerageOptions.FromConfig();
+
+            _brokerage = new ExanteBrokerage(options, new AggregationManager(), new ExanteSecurityProvider());
+        }
 
         protected override IBrokerage CreateBrokerage(IOrderProvider orderProvider, ISecurityProvider securityProvider)
         {
-            throw new System.NotImplementedException();
+            return _brokerage;
         }
+
         protected override bool IsAsync()
         {
-            throw new System.NotImplementedException();
+            return false;
         }
 
         protected override decimal GetAskPrice(Symbol symbol)
         {
-            throw new System.NotImplementedException();
+            if (_askPrice is null)
+            {
+                var brokerageSymbol = _brokerage.SymbolMapper.GetBrokerageSymbol(symbol);
+                const int ticksCount = 5;
+                var ticks = _brokerage.Client.GetTicks(brokerageSymbol, limit: ticksCount).Data.ToList();
+
+                var tick = ticks.Find(x => x.Ask?.ToList()[0].Price != null);
+                _askPrice = tick?.Ask?.ToList()[0].Price;
+                if (_askPrice is null)
+                {
+                    throw new Exception($"{ticksCount} ticks are without ask price. Try to increase `ticksCount`");
+                }
+            }
+
+            return _askPrice.Value;
         }
 
 
@@ -49,11 +83,14 @@ namespace QuantConnect.TemplateBrokerage.Tests
         {
             return new[]
             {
-                new TestCaseData(new MarketOrderTestParameters(Symbols.BTCUSD)).SetName("MarketOrder"),
-                new TestCaseData(new LimitOrderTestParameters(Symbols.BTCUSD, 10000m, 0.01m)).SetName("LimitOrder"),
-                new TestCaseData(new StopMarketOrderTestParameters(Symbols.BTCUSD, 10000m, 0.01m)).SetName("StopMarketOrder"),
-                new TestCaseData(new StopLimitOrderTestParameters(Symbols.BTCUSD, 10000m, 0.01m)).SetName("StopLimitOrder"),
-                new TestCaseData(new LimitIfTouchedOrderTestParameters(Symbols.BTCUSD, 10000m, 0.01m)).SetName("LimitIfTouchedOrder")
+                new TestCaseData(new MarketOrderTestParameters(Symbols.EURUSD)).SetName("MarketOrder"),
+                new TestCaseData(new LimitOrderTestParameters(Symbols.EURUSD, 10000m, 0.01m)).SetName("LimitOrder"),
+                new TestCaseData(new StopMarketOrderTestParameters(Symbols.EURUSD, 10000m, 0.01m)).SetName(
+                    "StopMarketOrder"),
+                new TestCaseData(new StopLimitOrderTestParameters(Symbols.EURUSD, 10000m, 0.01m)).SetName(
+                    "StopLimitOrder"),
+                new TestCaseData(new LimitIfTouchedOrderTestParameters(Symbols.EURUSD, 10000m, 0.01m)).SetName(
+                    "LimitIfTouchedOrder").Ignore("`LimitIfTouchedOrder` Is not supported by Exante"),
             };
         }
 
@@ -90,12 +127,24 @@ namespace QuantConnect.TemplateBrokerage.Tests
         [Test, TestCaseSource(nameof(OrderParameters))]
         public override void ShortFromLong(OrderTestParameters parameters)
         {
+            if (parameters is LimitOrderTestParameters or StopLimitOrderTestParameters or StopMarketOrderTestParameters)
+            {
+                Assert.Ignore("Replacing is not supported for this type of instrument. " +
+                              "Only cancellation and placing new order");
+            }
+
             base.ShortFromLong(parameters);
         }
 
         [Test, TestCaseSource(nameof(OrderParameters))]
         public override void LongFromShort(OrderTestParameters parameters)
         {
+            if (parameters is LimitOrderTestParameters or StopLimitOrderTestParameters)
+            {
+                Assert.Ignore("Replacing is not supported for this type of instrument. " +
+                              "Only cancellation and placing new order");
+            }
+
             base.LongFromShort(parameters);
         }
     }

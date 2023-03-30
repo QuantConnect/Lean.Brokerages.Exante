@@ -20,12 +20,14 @@ using QuantConnect.Tests;
 using QuantConnect.Logging;
 using QuantConnect.Securities;
 using QuantConnect.Data.Market;
+using QuantConnect.Configuration;
 using QuantConnect.Lean.Engine.HistoricalData;
+using QuantConnect.Lean.Engine.DataFeeds;
 
-namespace QuantConnect.TemplateBrokerage.Tests
+namespace QuantConnect.ExanteBrokerage.Tests
 {
-    [TestFixture, Ignore("Not implemented")]
-    public class TemplateBrokerageHistoryProviderTests
+    [TestFixture]
+    public class ExanteBrokerageHistoryProviderTests
     {
         private static TestCaseData[] TestParameters
         {
@@ -34,13 +36,13 @@ namespace QuantConnect.TemplateBrokerage.Tests
                 return new[]
                 {
                     // valid parameters, example:
-                    new TestCaseData(Symbols.BTCUSD, Resolution.Tick, TimeSpan.FromMinutes(1), TickType.Quote, typeof(Tick), false),
-                    new TestCaseData(Symbols.BTCUSD, Resolution.Minute, TimeSpan.FromMinutes(10), TickType.Quote, typeof(QuoteBar), false),
-                    new TestCaseData(Symbols.BTCUSD, Resolution.Daily, TimeSpan.FromDays(10), TickType.Quote, typeof(QuoteBar), false),
+                    new TestCaseData(Symbols.EURUSD, Resolution.Tick, TimeSpan.FromMinutes(1), TickType.Quote, typeof(Tick), false),
+                    new TestCaseData(Symbols.EURUSD, Resolution.Minute, TimeSpan.FromMinutes(10), TickType.Quote, typeof(QuoteBar), false),
+                    new TestCaseData(Symbols.EURUSD, Resolution.Daily, TimeSpan.FromDays(10), TickType.Quote, typeof(QuoteBar), false),
 
-                    new TestCaseData(Symbols.BTCUSD, Resolution.Tick, TimeSpan.FromMinutes(1), TickType.Trade, typeof(Tick), false),
-                    new TestCaseData(Symbols.BTCUSD, Resolution.Minute, TimeSpan.FromMinutes(10), TickType.Trade, typeof(TradeBar), false),
-                    new TestCaseData(Symbols.BTCUSD, Resolution.Daily, TimeSpan.FromDays(10), TickType.Trade, typeof(TradeBar), false),
+                    new TestCaseData(Symbols.EURUSD, Resolution.Tick, TimeSpan.FromMinutes(1), TickType.Trade, typeof(Tick), true),
+                    new TestCaseData(Symbols.EURUSD, Resolution.Minute, TimeSpan.FromMinutes(10), TickType.Trade, typeof(TradeBar), false),
+                    new TestCaseData(Symbols.EURUSD, Resolution.Daily, TimeSpan.FromDays(10), TickType.Trade, typeof(TradeBar), false),
                 };
             }
         }
@@ -50,13 +52,15 @@ namespace QuantConnect.TemplateBrokerage.Tests
         {
             TestDelegate test = () =>
             {
-                var brokerage = new TemplateBrokerage(null);
+                var options = ExanteBrokerageOptions.FromConfig();
+
+                var brokerage = new ExanteBrokerage(options, new AggregationManager(), null);
 
                 var historyProvider = new BrokerageHistoryProvider();
                 historyProvider.SetBrokerage(brokerage);
                 historyProvider.Initialize(new HistoryProviderInitializeParameters(null, null, null,
                     null, null, null, null,
-                    false, null));
+                    false, new DataPermissionManager()));
 
                 var marketHoursDatabase = MarketHoursDatabase.FromDataFolder();
                 var now = DateTime.UtcNow;
